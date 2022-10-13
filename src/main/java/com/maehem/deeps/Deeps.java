@@ -74,8 +74,8 @@ public class Deeps  extends Application {
         //quit when the window is close().
         window.setOnCloseRequest(e -> Platform.exit());
 
-        
-        playArea.getChildren().add(new Circle(200));
+        // Maybe catch exception here to report what kind?
+        playArea.getChildren().add(new StartingZone());
         
         window.show();        
     }
