@@ -14,22 +14,14 @@
     License for the specific language governing permissions and limitations 
     under the License.
  */
-package com.maehem.deeps;
-
-import javafx.geometry.Rectangle2D;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
+package com.maehem.deeps.model;
 
 /**
  *
- * @author mark
+ * @author Mark J Koch ( GitHub @maehem)
  */
-public class Tile extends ImageView {
-
-    public Tile( Image img, int cx, int cy, int dim ) {
-        super(img);
-        setViewport(new Rectangle2D(dim*cx, dim*cy, dim, dim));
-        
-    }
-    
+public interface GameModel {
+    //public SheetModel getSheet( Character key );
+    public SheetModel getSheet(Long uid);
+    public void addSheet( SheetModel sheet );
 }

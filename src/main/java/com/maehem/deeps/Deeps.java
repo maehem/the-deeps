@@ -26,7 +26,6 @@ import javafx.application.Platform;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.layout.StackPane;
-import javafx.scene.shape.Circle;
 import javafx.stage.Stage;
 
 /**
@@ -75,7 +74,7 @@ public class Deeps  extends Application {
         window.setOnCloseRequest(e -> Platform.exit());
 
         // Maybe catch exception here to report what kind?
-        playArea.getChildren().add(new StartingZone());
+        //playArea.getChildren().add(new StartingZone());
         
         window.show();        
     }
