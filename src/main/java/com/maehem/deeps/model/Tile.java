@@ -48,7 +48,7 @@ public class Tile implements Cloneable {
     public static final int ROLLING_DEFAULT    = -1;
     
     private int blocking  = BLOCKING_DEFAULT;       // -1 = not blocking,  0-99  blocks/slows by this amount (99 is default)
-    private int inventory = INVENTORY_DEFAULT;      // -1 = not inventory. > 000-999 index in game
+    private int inventoryItem = INVENTORY_DEFAULT;      // -1 = not inventory. > 000-999 index in game
     private int weapon    = WEAPON_DEFAULT;         // -1 = not weapoon. 000-999 = damage. 0 = damaged weapon
     private int wear      = WEAR_DEFAULT;           // -1 = cannont be worn/damaged. >= 0.  degrades over time. Max 99
     private int soundFx   = SOUNDFX_DEFAULT;        // -1 = no sound emitted. 0-999 = sound index from a game table.
@@ -244,15 +244,15 @@ public class Tile implements Cloneable {
     }
 
     public int getInventoryItem() {
-        return inventory;
+        return inventoryItem;
     }
     
     public void setInventoryItem( int i) {
-        this.inventory = i;
+        this.inventoryItem = i;
     }
     
     public boolean isInventoryItem() {
-        return inventory >= 0;
+        return inventoryItem >= 0;
     }
     
     public int getBlocking() {
