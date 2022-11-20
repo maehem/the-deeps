@@ -83,8 +83,17 @@ public class EditorTilePropertiesPane extends VBox implements EditorProjectListe
             );
             descriptionLabel.setText(currentTile.getDescription());
             
+            // Uses reflection to access getter/setter
+            widgets.getChildren().add(createIntWidget("ablation"));
+            widgets.getChildren().add(createIntWidget("blocking"));
+            widgets.getChildren().add(createIntWidget("enemy"));
             widgets.getChildren().add(createIntWidget("inventoryItem"));
-            widgets.getChildren().add(createIntWidget("wear"));
+            widgets.getChildren().add(createIntWidget("luminous"));
+            widgets.getChildren().add(createIntWidget("npc"));
+            widgets.getChildren().add(createIntWidget("sound"));
+            widgets.getChildren().add(createIntWidget("storage"));
+            widgets.getChildren().add(createIntWidget("track"));
+            widgets.getChildren().add(createIntWidget("rolling"));
             widgets.getChildren().add(createIntWidget("weapon"));
                     
         }
