@@ -21,7 +21,8 @@ import java.util.ArrayList;
 import java.util.logging.Level;
 
 /**
- *
+ *  TODO: Implement 4-char Flags
+ * 
  * @author Mark J Koch ( GitHub @maehem)
  */
 public class Tile implements Cloneable {
@@ -33,11 +34,31 @@ public class Tile implements Cloneable {
     private int x; //  LayoutX
     private int y; //  LayoutY
     
-    private String description = "";
-    private int inventoryItem = -1; // -1 = not inventory. > 000-999 index in game
-    private int weapon = -1;        // -1 = not weapoon. 000-999 = damage. 0 = damaged weapon
-    private int wear = 99;          // -1 = cannont be worn/damaged. >= 0.  degrades over time. Max 99
+    private String description = ""; // String description
+    
+    public static final int BLOCKING_DEFAULT   = -1;
+    public static final int INVENTORY_DEFAULT  = -1;
+    public static final int WEAPON_DEFAULT     = -1;
+    public static final int WEAR_DEFAULT       = 99;
+    public static final int SOUNDFX_DEFAULT    = -1;
+    public static final int STORAGE_DEFAULT    = -1;
+    public static final int NPC_DEFAULT        = -1;
+    public static final int ENEMY_DEFAULT      = -1;
+    public static final int TRACK_DEFAULT      = -1;
+    public static final int ROLLING_DEFAULT    = -1;
+    
+    private int blocking  = BLOCKING_DEFAULT;       // -1 = not blocking,  0-99  blocks/slows by this amount (99 is default)
+    private int inventory = INVENTORY_DEFAULT;      // -1 = not inventory. > 000-999 index in game
+    private int weapon    = WEAPON_DEFAULT;         // -1 = not weapoon. 000-999 = damage. 0 = damaged weapon
+    private int wear      = WEAR_DEFAULT;           // -1 = cannont be worn/damaged. >= 0.  degrades over time. Max 99
+    private int soundFx   = SOUNDFX_DEFAULT;        // -1 = no sound emitted. 0-999 = sound index from a game table.
+    private int storage   = STORAGE_DEFAULT;        // -1 = cannot store items. 0-999 = game index of storage item.
+    private int npc       = NPC_DEFAULT;            // -1 = not a NPC.  0-999 = npc index from game.
+    private int enemy     = ENEMY_DEFAULT;          // -1 = not enemy. 0-999 = enemy from game.     
+    private int track     = TRACK_DEFAULT;          // -1 = not track, track element, can move 'rolling' items.
+    private int rolling   = ROLLING_DEFAULT;        // -1 = rail thing, moves on rails.
 
+    
     public Tile( String mnemonic, String props ) {
         this(mnemonic, 0, 0, props);
     }
@@ -51,26 +72,29 @@ public class Tile implements Cloneable {
             // Setup flags from  sm tile properties.
             // colon :  separated list.
             //String props = sm.getPropsFor(getTileNum());
-            if (props.length() > 0) {
-                String[] flags = props.split(":");
-                log.log(Level.FINER,
-                        "Tile {0} has {1} items.",
-                        new Object[]{mnemonic, flags.length}
-                );
-
-                for (String flag : flags) {
-                    log.log(Level.FINER, "    flag: {0}", flag);
-                    toggleMapFlag(flag.charAt(0));                    
-                    configureFlagSettings(flag);
-                }
-            } else {
-                log.log(Level.INFO, "No props for {0}", mnemonic);
-            }
+            
+            applyFlags( props );
+            
+//            if (props.length() > 0) {
+//                String[] flags = props.split(":");
+//                log.log(Level.FINER,
+//                        "Tile {0} has {1} items.",
+//                        new Object[]{mnemonic, flags.length}
+//                );
+//
+//                for (String flag : flags) {
+//                    log.log(Level.FINER, "    flag: {0}", flag);
+//                    toggleMapFlag(flag.charAt(0));                    
+//                    configureFlagSetting(flag);
+//                }
+//            } else {
+//                log.log(Level.INFO, "No props for {0}", mnemonic);
+//            }
         }
     }
 
     private void toggleMapFlag( Character f ) {
-        //    Non-Map:  I, W, T, R, C, E, M, N 
+        //    Non-Map:  I, W, T, R, C, E, M, N, S, U
         switch ( f ) {
             case 'I':  // INVT . inventory item (can be picked up)
             case 'W':  // WEAP . weapon
@@ -81,16 +105,40 @@ public class Tile implements Cloneable {
             case 'N':  // NMAP . other non-map
             case 'S':  // STOR . storage
             case 'M':  // MOUS . mouse cursor
-            case 'U':  // SHAD . cast shadow
+            case 'U':  // SHAD . cast shadow  ALT  EFFX
                 this.map = false;
                 break;
         }
     }
     
-    private void configureFlagSettings( String flag  ) {
+    protected void applyFlags(String props) {
+        if (props.length() > 0) {
+            String[] flags = props.split(":");
+            log.log(Level.FINER,
+                    "Tile {0} has {1} items.",
+                    new Object[]{mnemonic, flags.length}
+            );
+
+            for (String flag : flags) {
+                log.log(Level.FINER, "    flag: {0}", flag);
+                toggleMapFlag(flag.charAt(0));
+                configureFlagSetting(flag);
+            }
+        } else {
+            log.log(Level.INFO, "No props for {0}", mnemonic);
+        }
+    }
+
+    private void configureFlagSetting( String flag  ) {
         Character f = flag.charAt(0);
         // Addtional flag considerations.
         switch( f ) {
+            case 'B': // Blocking  0-99 (99=default, can be blank)
+                if ( flag.length()>1) {
+                    setBlocking(Integer.parseInt(flag.substring(1)) );
+                } else {
+                    setBlocking( 99 );
+                }
             case 'D': // Description    DESC<string>  : D<string>
                 if ( flag.length() > 1 ) {
                     this.description = flag.substring(1);
@@ -196,15 +244,28 @@ public class Tile implements Cloneable {
     }
 
     public int getInventoryItem() {
-        return inventoryItem;
+        return inventory;
     }
     
     public void setInventoryItem( int i) {
-        this.inventoryItem = i;
+        this.inventory = i;
     }
     
     public boolean isInventoryItem() {
-        return inventoryItem >= 0;
+        return inventory >= 0;
+    }
+    
+    public int getBlocking() {
+        return blocking;
+    }
+    
+    public static final int BLOCK_MAX = 99;
+    public void setBlocking( int val) {
+        this.blocking = val;
+    }
+    
+    public boolean isBlocking() {
+        return blocking>=0;
     }
     
     public int getWeapon() {
@@ -242,12 +303,104 @@ public class Tile implements Cloneable {
         return getWear() >= 0;
     }
 
-    @Override
-    public Object clone() throws CloneNotSupportedException {
-        return super.clone(); 
+    /**
+     * @return the soundFx
+     */
+    public int getSoundFx() {
+        return soundFx;
     }
 
-    public void setSheetCode(char c) {
+    /**
+     * @param soundFx the soundFx to set
+     */
+    public void setSoundFx(int soundFx) {
+        this.soundFx = soundFx;
+    }
+
+    /**
+     * @return the storage
+     */
+    public int getStorage() {
+        return storage;
+    }
+
+    /**
+     * @param storage the storage to set
+     */
+    public void setStorage(int storage) {
+        this.storage = storage;
+    }
+
+    /**
+     * @return the npc
+     */
+    public int getNpc() {
+        return npc;
+    }
+
+    /**
+     * @param npc the npc to set
+     */
+    public void setNpc(int npc) {
+        this.npc = npc;
+    }
+
+    /**
+     * @return the enemy
+     */
+    public int getEnemy() {
+        return enemy;
+    }
+
+    /**
+     * @param enemy the enemy to set
+     */
+    public void setEnemy(int enemy) {
+        this.enemy = enemy;
+    }
+
+    /**
+     * @return the track
+     */
+    public boolean isTrack() {
+        return track>=0;
+    }
+
+    public int getTrack() {
+        return track;
+    }
+    
+    /**
+     * @param track the track to set
+     */
+    public void setTrack(int track) {
+        this.track = track;
+    }
+
+    /**
+     * @return the rolling
+     */
+    public boolean isRolling() {
+        return rolling>=0;
+    }
+
+    /**
+     * Get value of 'rolling', game's version of direction and speed.
+     * 
+     * @return 
+     */
+    public int getRolling() {
+        return rolling;
+    }
+    
+    /**
+     * @param rolling the rolling to set
+     */
+    public void setRolling(int rolling) {
+        this.rolling = rolling;
+    }
+
+   public void setSheetCode(char c) {
         this.mnemonic = String.valueOf(c) + mnemonic.substring(1);
         notifyMnemonicChanged();
     }
@@ -260,5 +413,45 @@ public class Tile implements Cloneable {
         listeners.clear();
     }
     
+    public String getFlags() {
+        //  I, W, T, R, C, E, M, N, S, U
+        StringBuilder sb = new StringBuilder();
+        
+        if ( getInventoryItem() != INVENTORY_DEFAULT ) {
+            sb.append("I").append(getInventoryItem()).append(":");
+        }
+        if ( getBlocking() != BLOCKING_DEFAULT ) {
+            if ( getBlocking() < 99 ) {
+                sb.append("B").append(getBlocking()).append(":");
+            } else {
+                sb.append("B").append(":");                
+            }
+        }
+        if ( getWeapon() != WEAPON_DEFAULT ) {
+            sb.append("W").append(getWeapon()).append(":");
+        }
+        if ( getSoundFx() != SOUNDFX_DEFAULT ) {
+            sb.append("F").append(getSoundFx()).append(":");
+        }
+        if ( getStorage() != STORAGE_DEFAULT ) {
+            sb.append("S").append(getStorage()).append(":");
+        }
+        if ( getRolling() != ROLLING_DEFAULT ) {
+            sb.append("R").append(getRolling()).append(":");
+        }
+        if ( getTrack() != TRACK_DEFAULT ) {
+            sb.append("T").append(getTrack()).append(":");
+        }
+
+        sb.append("D").append(getDescription());
+        
+        return sb.toString();
+    }
     
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        return super.clone(); 
+    }
+
+     
 }

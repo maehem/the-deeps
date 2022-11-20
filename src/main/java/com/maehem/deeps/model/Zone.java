@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Properties;
 import java.util.logging.Level;
 
 /**
@@ -38,6 +39,9 @@ public class Zone {
 
     public static final int WIDTH = 40;
     public static final int HEIGHT = 30;
+    
+    private static final String BASE_PROP_KEY = "base.";
+    private static final String ITEM_PROP_KEY = "item.";
 
     public static enum TileType { BASE, ITEM };
 
@@ -68,7 +72,12 @@ public class Zone {
         initItemTiles();
     }
 
-    private Zone( GameModel gm, String name, HashMap<Character, Long> sheetMap, ArrayList<String> base, ArrayList<String> item ) {
+    private Zone( GameModel gm, String name, 
+            HashMap<Character, Long> sheetMap, 
+            ArrayList<String> base,
+            ArrayList<String> item,
+            Properties flags
+    ) {
         this.gameModel = gm;
         this.name = name;
         this.sheetMap.putAll(sheetMap);
@@ -91,44 +100,41 @@ public class Zone {
                 String itemCode = itemRow[x];
                 Long sheetUid = sheetMap.get(baseCode.charAt(0));
                 SheetModel sheet = gm.getSheet(sheetUid);
-//                String baseProps = sheet.getPropsFor(
-//                        Integer.parseInt(baseCode.substring(1))
-//                );
-                
                 
                 try {
+                    // Clone the tile from the Sheet.
                     Tile sheetBaseTile = (Tile) sheet.getTile(
                             Integer.parseInt(baseCode.substring(1))
                     ).clone();
                     sheetBaseTile.setX(x);
                     sheetBaseTile.setY(y);
                     sheetBaseTile.setSheetCode(baseCode.charAt(0));
+                    // Apply flags for this tile.
+                    String pFlags = flags.getProperty(BASE_PROP_KEY + (y*width+x));
+                    if ( pFlags != null ) {
+                        sheetBaseTile.applyFlags( pFlags );
+                    }
                     this.baseTile[y][x] = sheetBaseTile;
                 } catch (CloneNotSupportedException ex) {
                     log.log(Level.SEVERE, "Could not clone uid:" + sheetUid + ":" + baseCode, ex);
                 }
-                //this.baseTile[y][x] = new Tile(baseCode, x, y, baseProps);
-//                String itemProps = sheet.getPropsFor(
-//                        Integer.parseInt(itemCode.substring(1))
-//                );
-                
                 
                 try {
+                    // Clone the tile from the sheet.
                     Tile sheetItemTile = (Tile) sheet.getTile(
                             Integer.parseInt(itemCode.substring(1))
                     ).clone();
                     sheetItemTile.setX(x);
                     sheetItemTile.setY(y);
                     sheetItemTile.setSheetCode(itemCode.charAt(0));
+                    String pFlags = flags.getProperty(ITEM_PROP_KEY + (y*width+x));
+                    if ( pFlags != null ) {
+                        sheetItemTile.applyFlags( pFlags );
+                    }
                     this.itemTile[y][x] = sheetItemTile;
                 } catch (CloneNotSupportedException ex) {
                     log.log(Level.SEVERE, "Could not clone uid:" + sheetUid + ":" + itemCode, ex);
                 }
-                    //this.itemTile[y][x] = new Tile(itemCode, x, y, itemProps);
-                    
-                    // apply default settings from sheet.
-                    //this.baseTile[y][x].setProperties( propString );
-                    //String propsFor = sheet.getPropsFor( Integer.valueOf(baseRow[x].substring(1)));
             }
         }
     }
@@ -230,6 +236,17 @@ public class Zone {
         }
     }
 
+    /**
+     * load zone data
+     * 
+     * TODO: Read zone tile flag data, updating any defaults.
+     * 
+     * @param gm GameModel
+     * @param in Input Stream
+     * @return the loaded data as a Zone
+     * @throws IOException
+     * @throws ZoneFileFormatException 
+     */
     public static Zone load(GameModel gm, InputStream in ) throws IOException, ZoneFileFormatException {
         HashMap<Character, Long> sheetMap = new HashMap<>();
         ArrayList<String> baseRows = new ArrayList<>();
@@ -309,9 +326,24 @@ public class Zone {
         if ( baseRows.size() != itemRows.size() ) {
             log.log(Level.WARNING, "    Base Rows count and Item rows count don't match!");
         }
-        return new Zone(gm, name, sheetMap, baseRows, itemRows);        
+        
+        // Rest of file is properties.
+        Properties p = new Properties();
+        p.load(br);
+        log.log(Level.INFO, "    Found {0} properties", p.size());
+        
+        
+        return new Zone(gm, name, sheetMap, baseRows, itemRows, p);        
     }
     
+    /**
+     * Store Zone data.
+     * 
+     * TODO: Store tile flag data.
+     * 
+     * @param os
+     * @return 
+    */
     public boolean store(OutputStream os) {
         try ( BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(os))) {
             bw.write("# name: " + name);
@@ -343,6 +375,32 @@ public class Zone {
                 }
                 bw.newLine();
             }
+            
+            bw.newLine();
+            
+            // Write base tile properties
+            bw.write("# Base Tile Flags");
+            bw.newLine();
+            for (int y = 0; y < height; y++) {
+                for (int x = 0; x < width; x++) {
+                    bw.write(BASE_PROP_KEY + (y*width+x) + " = " + baseTile[y][x].getFlags());
+                    bw.newLine();
+                }
+                bw.newLine(); // Gap after every row to make it easier to read.
+            }
+            
+            // Write item tile properties
+            bw.write("# Item Tile Flags");
+            bw.newLine();
+            for (int y = 0; y < height; y++) {
+                for (int x = 0; x < width; x++) {
+                    bw.write(ITEM_PROP_KEY + (y*width+x) + " = " + itemTile[y][x].getFlags());
+                    bw.newLine(); // Gap after every row to make it easier to read.
+                }
+                bw.newLine();
+            }
+            
+            
 
         } catch (IOException ex) {
             log.log(Level.SEVERE, null, ex);

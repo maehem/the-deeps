@@ -31,7 +31,9 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
 /**
- *
+ *  TODO: Properties widgets
+ * 
+ * 
  * @author Mark J Koch ( GitHub @maehem)
  */
 public class EditorTilePropertiesPane extends VBox implements EditorProjectListener {
