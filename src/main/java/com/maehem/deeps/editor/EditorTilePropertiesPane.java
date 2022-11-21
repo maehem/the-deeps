@@ -94,8 +94,7 @@ public class EditorTilePropertiesPane extends VBox implements EditorProjectListe
             widgets.getChildren().add(createIntWidget("storage"));
             widgets.getChildren().add(createIntWidget("track"));
             widgets.getChildren().add(createIntWidget("rolling"));
-            widgets.getChildren().add(createIntWidget("weapon"));
-                    
+            widgets.getChildren().add(createIntWidget("weapon"));                   
         }
     }
     

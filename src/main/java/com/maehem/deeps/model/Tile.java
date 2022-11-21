@@ -51,10 +51,10 @@ public class Tile implements Cloneable {
 
     public static final int BLOCKING_MAX = 99;
     
-    private int wear      = ABLATION_DEFAULT;           // -1 = cannont be worn/damaged. >= 0.  degrades over time. Max 99
+    private int ablation  = ABLATION_DEFAULT;       // -1 = cannont be worn/damaged. >= 0.  degrades over time. Max 99
     private int blocking  = BLOCKING_DEFAULT;       // -1 = not blocking,  0-99  blocks/slows by this amount (99 is default)
     private int enemy     = ENEMY_DEFAULT;          // -1 = not enemy. 0-999 = enemy from game.     
-    private int inventoryItem = INVENTORY_DEFAULT;      // -1 = not inventory. > 000-999 index in game
+    private int inventoryItem = INVENTORY_DEFAULT;  // -1 = not inventory. > 000-999 index in game
     private int luminous  = LUMINOUS_DEFAULT;       // -1 = no light emmited.  00-99, light effect # in game engine.
     private int npc       = NPC_DEFAULT;            // -1 = not a NPC.  0-999 = npc index from game.
     private int rolling   = ROLLING_DEFAULT;        // -1 = rail thing, moves on rails.
@@ -144,7 +144,7 @@ public class Tile implements Cloneable {
                 log.log(Level.FINER, "   Ablation:");
                 if (flag.length() > 1) {
                     String num = flag.substring(1);
-                    setEnemy(Integer.parseInt(num));
+                    setAblation(Integer.parseInt(num));
                     log.log(Level.FINER, "    n = {0}", num);
                 }
                 break;
@@ -156,6 +156,11 @@ public class Tile implements Cloneable {
                 }
             case 'C': // Character Player, NPC  CHAR999 : C<idNumber>
                 log.log(Level.FINER, "   Character.");
+                if (flag.length() > 1) {
+                    String num = flag.substring(1);
+                    setNpc(Integer.parseInt(num));
+                    log.log(Level.FINER, "    n = {0}", num);
+                }
                 break;
             case 'D': // Description    DESC<string>  : D<string>
                 if ( flag.length() > 1 ) {
@@ -167,6 +172,14 @@ public class Tile implements Cloneable {
                 if (flag.length() > 1) {
                     String num = flag.substring(1);
                     setEnemy(Integer.parseInt(num));
+                    log.log(Level.FINER, "    n = {0}", num);
+                }
+                break;
+            case 'F': // Foley/Sound, SNDX  SNDX999 : F<idNumber>
+                log.log(Level.FINER, "   SoundFX:");
+                if (flag.length() > 1) {
+                    String num = flag.substring(1);
+                    setSound(Integer.parseInt(num));
                     log.log(Level.FINER, "    n = {0}", num);
                 }
                 break;
@@ -191,6 +204,14 @@ public class Tile implements Cloneable {
                 if (flag.length() > 1) {
                     String num = flag.substring(1);
                     setStorage(Integer.parseInt(num));
+                    log.log(Level.FINER, "    n = {0}", num);
+                }
+                break;
+            case 'T': // Track, TRAK  TRAK99 : T<idNumber>
+                log.log(Level.FINER, "   Track:");
+                if (flag.length() > 1) {
+                    String num = flag.substring(1);
+                    setTrack(Integer.parseInt(num));
                     log.log(Level.FINER, "    n = {0}", num);
                 }
                 break;
@@ -344,28 +365,28 @@ public class Tile implements Cloneable {
         return weapon >= 0;
     }
     
-    public int getWear() {
-        return wear;
+    public int getAblation() {
+        return ablation;
     }
     
-    public void setWear( int newValue )  {
-        wear = newValue;
+    public void setAblation( int newValue )  {
+        ablation = newValue;
     }
     
-    public void applyWear(int amount) {
-        if (canWear()) {
-            setWear(getWear() + amount);
+    public void applyAblation(int amount) {
+        if (canAblate()) {
+            setAblation(getAblation() + amount);
         }
-        if (getWear() < 0) {
-            setWear(0);
+        if (getAblation() < 0) {
+            setAblation(0);
         }
-        if (getWear() > 99) {
-            setWear(99);
+        if (getAblation() > 99) {
+            setAblation(99);
         }
     }
     
-    public boolean canWear() {
-        return getWear() >= 0;
+    public boolean canAblate() {
+        return getAblation() >= 0;
     }
 
     /**
@@ -482,8 +503,8 @@ public class Tile implements Cloneable {
         //  I, W, T, R, C, E, M, N, S, U
         StringBuilder sb = new StringBuilder();
         
-        if ( getWear() != ABLATION_DEFAULT ) {
-            sb.append("A").append(getWear()).append(":");
+        if ( getAblation() != ABLATION_DEFAULT ) {
+            sb.append("A").append(getAblation()).append(":");
         }
         if ( getBlocking() != BLOCKING_DEFAULT ) {
             if ( getBlocking() < 99 ) {
