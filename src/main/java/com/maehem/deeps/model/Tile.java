@@ -248,7 +248,7 @@ public class Tile implements Cloneable {
         // Pad the code such that A0 would result in A000
         this.mnemonic = code.charAt(0) + 
                 String.format("%03d", Integer.valueOf(code.substring(1)));
-        log.log( Level.INFO, "Monemonic padded to: " + this.mnemonic );
+        log.log(Level.INFO, "Monemonic padded to: {0}", this.mnemonic);
         notifyMnemonicChanged();
         return true;
     }
@@ -270,6 +270,11 @@ public class Tile implements Cloneable {
         return x;
     }
     
+    /**
+     * Set the X grid location in map
+     * 
+     * @param x location
+     */
     public void setX( int x ) {
         this.x = x;
     }
@@ -283,7 +288,23 @@ public class Tile implements Cloneable {
         return y;
     }
     
+    /**
+     * Set the Y grid location in map
+     * 
+     * @param y location
+     */
     public void setY( int y ) {
+        this.y = y;
+    }
+    
+    /**
+     * Set the grid location in map
+     * 
+     * @param x
+     * @param y 
+     */
+    public void setXY( int x, int y ) {
+        this.x = x;
         this.y = y;
     }
     
@@ -299,6 +320,18 @@ public class Tile implements Cloneable {
         listeners.add(l);
     }
 
+    public final boolean removeListener(TileListener l) {
+        return listeners.remove(l);
+    }
+    
+    /**
+     * Make sure we release resources when not being used.
+     * 
+     */
+    public void retire() {
+        listeners.clear();
+    }
+    
     private void notifyMnemonicChanged() {
         for (TileListener l : listeners) {
             l.tileCodeChanged(this);
@@ -491,14 +524,6 @@ public class Tile implements Cloneable {
         notifyMnemonicChanged();
     }
 
-    /**
-     * Make sure we release resources when not being used.
-     * 
-     */
-    public void retire() {
-        listeners.clear();
-    }
-    
     public String getFlags() {
         //  I, W, T, R, C, E, M, N, S, U
         StringBuilder sb = new StringBuilder();

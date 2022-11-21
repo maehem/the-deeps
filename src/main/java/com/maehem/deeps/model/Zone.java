@@ -106,8 +106,7 @@ public class Zone {
                     Tile sheetBaseTile = (Tile) sheet.getTile(
                             Integer.parseInt(baseCode.substring(1))
                     ).clone();
-                    sheetBaseTile.setX(x);
-                    sheetBaseTile.setY(y);
+                    sheetBaseTile.setXY(x,y);
                     sheetBaseTile.setSheetCode(baseCode.charAt(0));
                     // Apply flags for this tile.
                     String pFlags = flags.getProperty(BASE_PROP_KEY + (y*width+x));
@@ -124,8 +123,7 @@ public class Zone {
                     Tile sheetItemTile = (Tile) sheet.getTile(
                             Integer.parseInt(itemCode.substring(1))
                     ).clone();
-                    sheetItemTile.setX(x);
-                    sheetItemTile.setY(y);
+                    sheetItemTile.setXY(x,y);
                     sheetItemTile.setSheetCode(itemCode.charAt(0));
                     String pFlags = flags.getProperty(ITEM_PROP_KEY + (y*width+x));
                     if ( pFlags != null ) {
@@ -177,13 +175,11 @@ public class Zone {
     public void setTile( TileType type, int x, int y, Tile t ) {
         switch( type ) {
             case BASE:
-                t.setX(x);
-                t.setY(y);
+                t.setXY(x,y);
                 baseTile[y][x] = t;
                 break;
             case ITEM:
-                t.setX(x);
-                t.setY(y);
+                t.setXY(x,y);
                 itemTile[y][x] = t;
                 break;
         }
@@ -204,14 +200,12 @@ public class Zone {
             case BASE:
                 oldTile = baseTile[y][x];
                 oldTile.retire();
-                t.setX(x);
-                t.setY(y);
+                t.setXY(x,y);
                 baseTile[y][x] = t;
                 break;
             case ITEM:
                 oldTile = itemTile[y][x];
-                t.setX(x);
-                t.setY(y);
+                t.setXY(x,y);
                 itemTile[y][x] = t;
                 break;
         }
