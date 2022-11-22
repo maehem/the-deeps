@@ -73,30 +73,8 @@ public class Tile implements Cloneable {
         this.mnemonic = mnemonic;
         this.x = x;
         this.y = y;
-            
-        if (props != null) {
-            // Setup flags from  sm tile properties.
-            // colon :  separated list.
-            //String props = sm.getPropsFor(getTileNum());
-            
-            applyFlags( props );
-            
-//            if (props.length() > 0) {
-//                String[] flags = props.split(":");
-//                log.log(Level.FINER,
-//                        "Tile {0} has {1} items.",
-//                        new Object[]{mnemonic, flags.length}
-//                );
-//
-//                for (String flag : flags) {
-//                    log.log(Level.FINER, "    flag: {0}", flag);
-//                    toggleMapFlag(flag.charAt(0));                    
-//                    configureFlagSetting(flag);
-//                }
-//            } else {
-//                log.log(Level.INFO, "No props for {0}", mnemonic);
-//            }
-        }
+                   
+        applyFlags(props);  // colon :  separated list. 
     }
 
     private void toggleMapFlag( Character f ) {
@@ -119,7 +97,7 @@ public class Tile implements Cloneable {
     }
     
     protected final void applyFlags(String props) {
-        if (props.length() > 0) {
+        if (props != null && props.length() > 0) {
             String[] flags = props.split(":");
             log.log(Level.FINER,
                     "Tile {0} has {1} items.",
@@ -154,6 +132,7 @@ public class Tile implements Cloneable {
                 } else {
                     setBlocking( BLOCKING_MAX );
                 }
+                break;
             case 'C': // Character Player, NPC  CHAR999 : C<idNumber>
                 log.log(Level.FINER, "   Character.");
                 if (flag.length() > 1) {

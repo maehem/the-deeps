@@ -95,7 +95,6 @@ public class Zone {
             String[] baseRow = base.get(y).split(" ");
             String[] itemRow = item.get(y).split(" ");
             for ( int x = 0; x<width; x++ ) {
-                //SheetModel sheet = gm.getSheet(baseRow[x].charAt(0));
                 String baseCode = baseRow[x];
                 String itemCode = itemRow[x];
                 Long sheetUid = sheetMap.get(baseCode.charAt(0));
@@ -110,9 +109,7 @@ public class Zone {
                     sheetBaseTile.setSheetCode(baseCode.charAt(0));
                     // Apply flags for this tile.
                     String pFlags = flags.getProperty(BASE_PROP_KEY + (y*width+x));
-                    if ( pFlags != null ) {
-                        sheetBaseTile.applyFlags( pFlags );
-                    }
+                    sheetBaseTile.applyFlags( pFlags );
                     this.baseTile[y][x] = sheetBaseTile;
                 } catch (CloneNotSupportedException ex) {
                     log.log(Level.SEVERE, "Could not clone uid:" + sheetUid + ":" + baseCode, ex);
@@ -126,9 +123,7 @@ public class Zone {
                     sheetItemTile.setXY(x,y);
                     sheetItemTile.setSheetCode(itemCode.charAt(0));
                     String pFlags = flags.getProperty(ITEM_PROP_KEY + (y*width+x));
-                    if ( pFlags != null ) {
-                        sheetItemTile.applyFlags( pFlags );
-                    }
+                    sheetItemTile.applyFlags( pFlags );                    
                     this.itemTile[y][x] = sheetItemTile;
                 } catch (CloneNotSupportedException ex) {
                     log.log(Level.SEVERE, "Could not clone uid:" + sheetUid + ":" + itemCode, ex);

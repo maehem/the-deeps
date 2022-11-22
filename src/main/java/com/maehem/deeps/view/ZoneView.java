@@ -49,6 +49,11 @@ public class ZoneView extends Group implements ZoneListener {
         for ( int y=0; y<zone.getHeight(); y++) {
             for ( int x=0; x<zone.getWidth(); x++) {
                 Tile tm  = zone.getTile(type, x, y);
+                if ( tm == null ) {
+                    log.log(Level.SEVERE, 
+                            "Zone: {0} Type: {1}  Tile {2}x{3} didn''t load!",
+                            new Object[]{zone.getName(), type.name(), x, y});
+                }
                 if ( type.equals(TileType.ITEM) && tm.getTileNum()==0 ) {
                     tm.setMap(false);
                 }  
