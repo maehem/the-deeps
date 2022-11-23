@@ -66,7 +66,7 @@ public class EditorZoneEditor extends ScrollPane implements EditorProjectListene
         project.addListener(this);
         
         Tile t0 = zone.getTile(Zone.TileType.BASE, 0, 0);
-        SheetModel sheet = zone.getSheet(t0.getSheetReference());
+        SheetModel sheet = zone.getSheet(t0.getSheet());
         int dim = sheet.getSize();
 
         stampHighlight = new Rectangle(0, 0, dim, dim);
@@ -164,7 +164,7 @@ public class EditorZoneEditor extends ScrollPane implements EditorProjectListene
             try {
                 //zone.swapTile(f, x, y, key + String.valueOf(project.getCurrentTileNum() ));
                 Tile clone = (Tile) project.getCurrentSheetTile().clone();
-                clone.setSheetCode(key);
+                clone.setSheet(key);
                 
                 zone.swapTile(f, x, y, clone);
                 project.setEdited(true);
@@ -263,7 +263,7 @@ public class EditorZoneEditor extends ScrollPane implements EditorProjectListene
             //String currentTile = key + String.valueOf( project.getCurrentTileNum());
             
             Tile clone = (Tile) project.getCurrentSheetTile().clone();
-            clone.setSheetCode(key);
+            clone.setSheet(key);
             log.log(Level.INFO, "Set stamp for: {0}", new Object[]{
                 key + clone.getMnemonic().substring(1)
             });

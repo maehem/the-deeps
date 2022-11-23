@@ -54,7 +54,7 @@ public class ZoneView extends Group implements ZoneListener {
                             "Zone: {0} Type: {1}  Tile {2}x{3} didn''t load!",
                             new Object[]{zone.getName(), type.name(), x, y});
                 }
-                if ( type.equals(TileType.ITEM) && tm.getTileNum()==0 ) {
+                if ( type.equals(TileType.ITEM) && tm.getIndex()==0 ) {
                     tm.setMap(false);
                 }  
                 

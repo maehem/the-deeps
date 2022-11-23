@@ -44,7 +44,7 @@ public class TileView extends Group implements TileListener {
     public TileView( Tile tm,  Zone zone ) {//, int x, int y ) {
         this.zone = zone;
         this.tile = tm;
-        SheetModel sm = zone.getSheet(tm.getSheetReference());
+        SheetModel sm = zone.getSheet(tm.getSheet());
         this.dim = sm.getSize();
         this.dSc = dim*sm.getFidelity();
         this.view = new ImageView(sm.getImage());
@@ -79,8 +79,8 @@ public class TileView extends Group implements TileListener {
         view.setScaleX(1.0/sm.getFidelity());
         view.setScaleY(1.0/sm.getFidelity());
         
-        int cx = tile.getTileNum()%sm.getWidth();
-        int cy = tile.getTileNum()/sm.getWidth();
+        int cx = tile.getIndex()%sm.getWidth();
+        int cy = tile.getIndex()/sm.getWidth();
     
         view.setViewport(new Rectangle2D( cx*dSc, cy*dSc, dSc, dSc ));
 
@@ -110,9 +110,9 @@ public class TileView extends Group implements TileListener {
                 }
         );
         // Sheet might have changed.  Need to get it.
-        SheetModel sm = zone.getSheet(tile.getSheetReference());
-        int cx = tile.getTileNum()%sm.getWidth();
-        int cy = tile.getTileNum()/sm.getWidth();
+        SheetModel sm = zone.getSheet(tile.getSheet());
+        int cx = tile.getIndex()%sm.getWidth();
+        int cy = tile.getIndex()/sm.getWidth();
         updateTileVisible();
         setGrey(false);
         view.setViewport(new Rectangle2D( cx*dSc, cy*dSc, dSc, dSc ));
@@ -120,8 +120,8 @@ public class TileView extends Group implements TileListener {
     
     private void updateTileVisible() {
         if ( !tile.isMapTile() ) {
-            view.setVisible(tile.getTileNum() > 0);
-            greyOut.setVisible(tile.getTileNum() > 0);
+            view.setVisible(tile.getIndex() > 0);
+            greyOut.setVisible(tile.getIndex() > 0);
         }
     }
     

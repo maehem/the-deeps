@@ -56,10 +56,11 @@ public class Zone {
     private Tile[][] baseTile;
     private Tile[][] itemTile;
 
-    public Zone( GameModel gm ) {
-        this(gm, "Unnamed", WIDTH, HEIGHT);
-    }
-
+//    public Zone( GameModel gm ) {
+//        this(gm, "Unnamed", WIDTH, HEIGHT);
+//    }
+//
+    
     public Zone(GameModel gm, String name, int width, int height) {
         this.gameModel = gm;
         this.name = name;
@@ -68,8 +69,14 @@ public class Zone {
         this.baseTile = new Tile[height][width];
         this.itemTile = new Tile[height][width];
 
-        initBaseTiles();
-        initItemTiles();
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                //baseTile[y][x] = new Tile("A00", x, y, null );
+                //itemTile[y][x] = new Tile("A00", x, y, null );
+                baseTile[y][x] = new Tile(this, 0, x, y, null );
+                itemTile[y][x] = new Tile(this, 0, x, y, null );
+            }
+        }
     }
 
     private Zone( GameModel gm, String name, 
@@ -106,7 +113,7 @@ public class Zone {
                             Integer.parseInt(baseCode.substring(1))
                     ).clone();
                     sheetBaseTile.setXY(x,y);
-                    sheetBaseTile.setSheetCode(baseCode.charAt(0));
+                    sheetBaseTile.setSheet(baseCode.charAt(0));
                     // Apply flags for this tile.
                     String pFlags = flags.getProperty(BASE_PROP_KEY + (y*width+x));
                     sheetBaseTile.applyFlags( pFlags );
@@ -121,7 +128,7 @@ public class Zone {
                             Integer.parseInt(itemCode.substring(1))
                     ).clone();
                     sheetItemTile.setXY(x,y);
-                    sheetItemTile.setSheetCode(itemCode.charAt(0));
+                    sheetItemTile.setSheet(itemCode.charAt(0));
                     String pFlags = flags.getProperty(ITEM_PROP_KEY + (y*width+x));
                     sheetItemTile.applyFlags( pFlags );                    
                     this.itemTile[y][x] = sheetItemTile;
@@ -207,22 +214,6 @@ public class Zone {
         
         // Notify tile change.
         notifyTileSwapped(oldTile, t);        
-    }
-
-    private void initBaseTiles() {
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
-                baseTile[y][x] = new Tile("A00", x, y, null );
-            }
-        }
-    }
-
-    private void initItemTiles() {
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
-                itemTile[y][x] = new Tile("A00", x, y, null );
-            }
-        }
     }
 
     /**

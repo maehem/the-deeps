@@ -297,7 +297,8 @@ public final class EditorProject implements GameModel {
         if ( !sheets.isEmpty() ) {
             setCurrentSheetTile(
                     sheets.get(0).getUID(), 
-                    new Tile("A00", "")
+                    sheets.get(0).getTile(0) 
+                    //new Tile(null,0, 0, 0, "")
             );
         }
         

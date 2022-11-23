@@ -107,7 +107,8 @@ public class SheetModel {
         for ( int y = 0; y < getHeight(); y++ ) {
             for ( int x=0; x < getWidth(); x++ ) {
                 int tilenum = (getWidth()*y)+x;
-                Tile t = new Tile("_" + tilenum, x, y, getPropsFor(tilenum));
+                //Tile t = new Tile("_" + tilenum, x, y, getPropsFor(tilenum));
+                Tile t = new Tile(null, '_', tilenum, x, y, getPropsFor(tilenum));
                 tiles.add(t);
                 //TileView tv = new TileView(t, sheet ); //, x, y);
                 //tileGroup.getChildren().add(tv);

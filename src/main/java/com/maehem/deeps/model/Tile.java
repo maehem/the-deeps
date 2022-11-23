@@ -30,7 +30,10 @@ public class Tile implements Cloneable {
     private final ArrayList<TileListener> listeners = new ArrayList<>();
     
     private boolean map = true;  // true if base map tile.
-    private String mnemonic; //  <Char><(int)nnn>  A00, C34, etc.
+    //private String mnemonic; //  <Char><(int)nnn>  A00, C34, etc.
+    private Zone zone;
+    private Character sheet;
+    private final int index;
     private int x; //  LayoutX
     private int y; //  LayoutY
     
@@ -65,18 +68,34 @@ public class Tile implements Cloneable {
     private int weapon    = WEAPON_DEFAULT;         // -1 = not weapoon. 000-999 = damage. 0 = damaged weapon
 
     
-    public Tile( String mnemonic, String props ) {
-        this(mnemonic, 0, 0, props);
-    }
+//    public Tile( String mnemonic, String props ) {
+//        this(mnemonic, 0, 0, props);
+//    }
 
-    public Tile(String mnemonic, int x, int y, String props) {
-        this.mnemonic = mnemonic;
+    public Tile(Zone zone, Character sheet, int index, int x, int y, String props) {
+        this.zone = zone;
+        this.sheet = sheet;
+        this.index = index;
+        //this.mnemonic = mnemonic;
         this.x = x;
         this.y = y;
                    
         applyFlags(props);  // colon :  separated list. 
     }
-
+    
+    /**
+     * Blank Tile.
+     * 
+     * @param zone
+     * @param index
+     * @param x
+     * @param y
+     * @param props 
+     */
+    public Tile(Zone zone, int index, int x, int y, String props) {
+        this( zone, '_', index, x, y, props);
+    }
+    
     private void toggleMapFlag( Character f ) {
         //    Non-Map:  I, W, T, R, C, E, M, N, S, U
         switch ( f ) {
@@ -101,7 +120,7 @@ public class Tile implements Cloneable {
             String[] flags = props.split(":");
             log.log(Level.FINER,
                     "Tile {0} has {1} items.",
-                    new Object[]{mnemonic, flags.length}
+                    new Object[]{getMnemonic(), flags.length}
             );
 
             for (String flag : flags) {
@@ -110,7 +129,7 @@ public class Tile implements Cloneable {
                 configureFlagSetting(flag);
             }
         } else {
-            log.log(Level.INFO, "No props for {0}", mnemonic);
+            log.log(Level.INFO, "No props for {0}", getMnemonic());
         }
     }
 
@@ -214,31 +233,60 @@ public class Tile implements Cloneable {
     }
     
     public String getMnemonic() {
-        return mnemonic.charAt(0) + 
-                String.format("%03d", Integer.valueOf(mnemonic.substring(1)));
+//        return mnemonic.charAt(0) + 
+//                String.format("%03d", Integer.valueOf(mnemonic.substring(1)));
+        
+        return sheet + String.format("%03d", index);
     }
 
-    public boolean setMnemonic(String code) {
-        if (code.charAt(0) < 65 || code.charAt(0) > 90) { // A-Z character
-            log.log(Level.SEVERE, "Tile.setCode(): Sheet code {0} is out of range in Tile!", code);
+//    public boolean setMnemonic(String code) {
+//        if (code.charAt(0) < 65 || code.charAt(0) > 90) { // A-Z character
+//            log.log(Level.SEVERE, "Tile.setCode(): Sheet code {0} is out of range in Tile!", code);
+//            //Thread.dumpStack();
+//            return false;
+//        }
+//        // Pad the code such that A0 would result in A000
+//        this.mnemonic = code.charAt(0) + 
+//                String.format("%03d", Integer.valueOf(code.substring(1)));
+//        log.log(Level.INFO, "Monemonic padded to: {0}", this.mnemonic);
+//        notifyMnemonicChanged();
+//        return true;
+//    }
+//
+//    public Character getSheetReference() {
+//        return mnemonic.charAt(0);
+//    }
+
+    public Zone getZone() {
+        return zone;
+    }
+    
+    public void setZone(Zone zone) {
+        this.zone = zone;
+    }
+    
+    public Character getSheet() {
+        return sheet;
+    }
+    
+    public boolean setSheet( Character sheet ) {
+        if (sheet < 65 || sheet > 90) { // A-Z character
+            log.log(Level.SEVERE, "Tile.setSheet(): Sheet code {0} is out of range in Tile!", sheet.toString());
             //Thread.dumpStack();
             return false;
         }
-        // Pad the code such that A0 would result in A000
-        this.mnemonic = code.charAt(0) + 
-                String.format("%03d", Integer.valueOf(code.substring(1)));
-        log.log(Level.INFO, "Monemonic padded to: {0}", this.mnemonic);
+        this.sheet = sheet;
         notifyMnemonicChanged();
         return true;
     }
-
-    public Character getSheetReference() {
-        return mnemonic.charAt(0);
+    
+    public int getIndex() {
+        return index;
     }
-
-    public final int getTileNum() {
-        return Integer.parseInt(mnemonic.substring(1));
-    }
+    
+//    public final int getTileNum() {
+//        return Integer.parseInt(mnemonic.substring(1));
+//    }
 
     /**
      * Grid X location in map.
@@ -498,10 +546,10 @@ public class Tile implements Cloneable {
         this.rolling = rolling;
     }
 
-   public void setSheetCode(char c) {
-        this.mnemonic = String.valueOf(c) + mnemonic.substring(1);
-        notifyMnemonicChanged();
-    }
+//   public void setSheetCode(char c) {
+//        this.mnemonic = String.valueOf(c) + mnemonic.substring(1);
+//        notifyMnemonicChanged();
+//    }
 
     public String getFlags() {
         //  I, W, T, R, C, E, M, N, S, U
