@@ -17,10 +17,14 @@
 package com.maehem.deeps.editor;
 
 import static com.maehem.deeps.Deeps.log;
+import com.maehem.deeps.model.EntityTile;
+import com.maehem.deeps.model.FixtureTile;
+import com.maehem.deeps.model.MapTile;
 import com.maehem.deeps.model.Tile;
 import com.maehem.deeps.model.Zone.TileType;
 import java.lang.reflect.Field;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -31,9 +35,9 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
 /**
- *  TODO: Properties widgets
- * 
- * 
+ * TODO: Properties widgets
+ *
+ *
  * @author Mark J Koch ( GitHub @maehem)
  */
 public class EditorTilePropertiesPane extends VBox implements EditorProjectListener {
@@ -44,61 +48,66 @@ public class EditorTilePropertiesPane extends VBox implements EditorProjectListe
     private Tile currentTile = null;
     private final Label titleLabel = new Label("Label");
     private final Label descriptionLabel = new Label("Description");
-    
 
-    public EditorTilePropertiesPane( TileType type) {
+    public EditorTilePropertiesPane(TileType type) {
         this.tileType = type;
         project = EditorProject.getInstance();
         project.addListener(this);
-                
+
         titleLabel.setText(tileType.name());
         VBox content = new VBox(
-                new HBox(titleLabel) ,
-                new HBox( descriptionLabel),
+                new HBox(titleLabel),
+                new HBox(descriptionLabel),
                 widgets);
-        
+
         // Scroll Pane
         ScrollPane sp = new ScrollPane(content);
         getChildren().add(sp);
         updateWidgets(null);
     }
 
-    private void updateWidgets( Tile newTile ) {
+    private void updateWidgets(Tile newTile) {
         this.currentTile = newTile;
         widgets.getChildren().clear();
-        
-        
-        if ( currentTile == null ) {
+
+        if (currentTile == null) {
             // Place no-selected label
-            titleLabel.setText(tileType.name() + "  (No zone tile selected)" );
+            titleLabel.setText(tileType.name() + "  (No zone tile selected)");
             descriptionLabel.setText("");
-            
+
             widgets.getChildren().add(new Label("Nothing focused."));
         } else {
             // title bar        
-            titleLabel.setText(tileType.name()  +
-                    "  " + currentTile.getMnemonic() + 
-                    "  X:" + currentTile.getX() + 
-                    "  Y:" + currentTile.getY() 
+            titleLabel.setText(tileType.name()
+                    + "  " + currentTile.getMnemonic()
+                    + "  X:" + currentTile.getX()
+                    + "  Y:" + currentTile.getY()
             );
             descriptionLabel.setText(currentTile.getDescription());
+
+            widgets.getChildren().add(createIntWidget(Tile.class, "blocking"));
+            widgets.getChildren().add(createIntWidget(Tile.class, "sound"));
+            widgets.getChildren().add(createIntWidget(Tile.class, "luminous"));
             
+            if (newTile instanceof MapTile) {
+
+            } else if (newTile instanceof FixtureTile) {
+                widgets.getChildren().add(createIntWidget(FixtureTile.class, "ablation"));
+                widgets.getChildren().add(createIntWidget(FixtureTile.class, "inventoryItem"));
+                widgets.getChildren().add(createIntWidget(FixtureTile.class, "storage"));
+                widgets.getChildren().add(createIntWidget(FixtureTile.class, "track"));
+                widgets.getChildren().add(createIntWidget(FixtureTile.class, "rolling"));
+                widgets.getChildren().add(createIntWidget(FixtureTile.class, "weapon"));
+            } else if (newTile instanceof EntityTile) {
+                widgets.getChildren().add(createIntWidget(EntityTile.class, "enemy"));
+                widgets.getChildren().add(createIntWidget(EntityTile.class, "npc"));
+
+            }
             // Uses reflection to access getter/setter
-            widgets.getChildren().add(createIntWidget("ablation"));
-            widgets.getChildren().add(createIntWidget("blocking"));
-            widgets.getChildren().add(createIntWidget("enemy"));
-            widgets.getChildren().add(createIntWidget("inventoryItem"));
-            widgets.getChildren().add(createIntWidget("luminous"));
-            widgets.getChildren().add(createIntWidget("npc"));
-            widgets.getChildren().add(createIntWidget("sound"));
-            widgets.getChildren().add(createIntWidget("storage"));
-            widgets.getChildren().add(createIntWidget("track"));
-            widgets.getChildren().add(createIntWidget("rolling"));
-            widgets.getChildren().add(createIntWidget("weapon"));                   
         }
     }
-    
-    private Node createValueWidget( String k, String v) {
+
+    private Node createValueWidget(String k, String v) {
         Label lbl = new Label(k + ": ");
         lbl.setPrefWidth(100);
         lbl.setAlignment(Pos.BOTTOM_RIGHT);
@@ -106,11 +115,11 @@ public class EditorTilePropertiesPane extends VBox implements EditorProjectListe
         TextField tf = new TextField(v);
         tf.setMaxWidth(Double.POSITIVE_INFINITY);
         HBox box = new HBox(lbl, tf);
-        box.setPadding(new Insets(2,6,2,2));
+        box.setPadding(new Insets(2, 6, 2, 2));
         return box;
     }
-    
-    private Node createIntWidget( String fieldName ) {
+
+    private Node createIntWidget(Class clazz, String fieldName) {
         Label lbl = new Label(fieldName + ": ");
         lbl.setPrefWidth(100);
         lbl.setAlignment(Pos.BOTTOM_RIGHT);
@@ -118,9 +127,24 @@ public class EditorTilePropertiesPane extends VBox implements EditorProjectListe
         Field field;
         TextField tf = new TextField("ERROR");
         try {
-            field = Tile.class.getDeclaredField(fieldName);
+            field = clazz.getDeclaredField(fieldName);
             field.setAccessible(true);
             tf.setText(Integer.toString(field.getInt(currentTile)));
+            tf.setOnKeyTyped((t) -> {
+                log.log(Level.FINER, "Typing in textfield {0} => {1}", 
+                        new Object[]{fieldName, t.getCharacter()});
+                try {
+                    int parseInt = Integer.parseInt(tf.getText());
+                    field.setInt(currentTile, parseInt);
+                    project.setEdited(true);
+                } catch (NumberFormatException  ex) {
+                    // Do not update value if not a number.
+                } catch (IllegalArgumentException ex) {
+                    log.log(Level.SEVERE, "Illegal Argument Exception", ex);
+                } catch (IllegalAccessException ex) {
+                    log.log(Level.SEVERE, "Illegal Access Exception", ex);
+                }
+            });
         } catch (NoSuchFieldException ex) {
             log.log(Level.SEVERE, "No such field " + fieldName, ex);
         } catch (SecurityException ex) {
@@ -130,23 +154,22 @@ public class EditorTilePropertiesPane extends VBox implements EditorProjectListe
         } catch (IllegalAccessException ex) {
             log.log(Level.SEVERE, "IllegalAccess for field: " + fieldName, ex);
         }
+        
+        
         HBox box = new HBox(lbl, tf);
-        box.setPadding(new Insets(2,6,2,2));
+        box.setPadding(new Insets(2, 6, 2, 2));
         return box;
     }
-            
-            
+
     @Override
     public void projectStateChanged(EditorProject p, ChangeType type) {
-        if ( type == ChangeType.FOCUS ) {
+        if (type == ChangeType.FOCUS) {
             Tile ct = p.getFocusedTile(tileType);
-            if ( ct != currentTile ) {
-                log.log(Level.INFO, "Focus changed for properties tab.");
-                updateWidgets( ct );
+            if (ct != currentTile) {
+                log.log(Level.FINE, "Focus changed for properties tab.");
+                updateWidgets(ct);
             }
         }
     }
-    
-    
-    
+
 }

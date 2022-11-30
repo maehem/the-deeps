@@ -17,6 +17,7 @@
 package com.maehem.deeps.view;
 
 import static com.maehem.deeps.Deeps.log;
+import com.maehem.deeps.model.MapTile;
 import com.maehem.deeps.model.Tile;
 import com.maehem.deeps.model.ZoneListener;
 import com.maehem.deeps.model.Zone;
@@ -32,64 +33,80 @@ import javafx.scene.Node;
 public class ZoneView extends Group implements ZoneListener {
 
     private final Zone zone;
-    
-    public ZoneView( Zone zm ) {
+
+    public ZoneView(Zone zm) {
         this.zone = zm;
-        
+
         log.log(Level.FINER, "Create ZoneView for : {0}", zm.getName());
-        
+
         buildMap(TileType.BASE);
         buildMap(TileType.ITEM);
-        
-        zone.addListener(this);        
+
+        zone.addListener(this);
     }
-    
-    private void buildMap( TileType type) {
+
+    private void buildMap(TileType type) {
         log.log(Level.FINER, "  Build Map for: {0}", type.name());
-        for ( int y=0; y<zone.getHeight(); y++) {
-            for ( int x=0; x<zone.getWidth(); x++) {
-                Tile tm  = zone.getTile(type, x, y);
-                if ( tm == null ) {
-                    log.log(Level.SEVERE, 
+        for (int y = 0; y < zone.getHeight(); y++) {
+            for (int x = 0; x < zone.getWidth(); x++) {
+                Tile tm = zone.getTile(type, x, y);
+                if (tm != null) {
+                    if (type.equals(TileType.ITEM) && tm.getIndex() == 0) {
+                        //tm.setMap(false);
+                        continue;  // Don't place Item.index 0 tiles.
+                    }
+
+                    TileView t = new TileView(tm, zone); //, x, y);                
+                    getChildren().add(t);
+                } else if (type == TileType.BASE) {
+                    log.log(Level.SEVERE,
                             "Zone: {0} Type: {1}  Tile {2}x{3} didn''t load!",
                             new Object[]{zone.getName(), type.name(), x, y});
-                }
-                if ( type.equals(TileType.ITEM) && tm.getIndex()==0 ) {
-                    tm.setMap(false);
-                }  
-                
-                TileView t = new TileView(tm, zone ); //, x, y);                
-                getChildren().add(t);
+                } // else  TileType.ITEM tiles that are null, nothing to do.
             }
         }
     }
-    
+
     public final Zone getModel() {
         return zone;
     }
-    
+
     @Override
     public void zoneTileChanged(Tile t) {
     }
 
     @Override
     public void zoneTileSwapped(Tile tOld, Tile tNew) {
-        if ( tOld == null ) {
-            log.log(Level.WARNING, "Tried to swap old tile that is null!");
-            return;
-        }
-        for ( Node n: getChildrenUnmodifiable() ) {
-            if ( n instanceof TileView ) {
-                TileView tv = (TileView)n;
-                if ( tv.getTile().equals(tOld) ) {
-                    int idx = getChildren().indexOf(tv);
-                    TileView tvNew = new TileView(tNew, zone);
-                    tvNew.setGrey(tv.isGrey());
-                    getChildren().set(idx, tvNew);
-                    return;
+        if (tOld == null) { // Add new non-map tile.
+            log.log(Level.INFO, "Tried to swap old tile that is null!");
+            if (tOld instanceof MapTile) {
+                log.log(Level.SEVERE, "Tried to insert MapTile where there was previously no tile.\n    This should not be possible!");
+                return;
+            }
+            TileView tvNew = new TileView(tNew, zone);
+            tvNew.setGrey(false);
+            getChildren().add(tvNew);
+
+            //return;
+        } else {
+            for (Node n : getChildrenUnmodifiable()) {
+                if (n instanceof TileView) {
+                    TileView tv = (TileView) n;
+                    if (tv.getTile().equals(tOld)) {
+                        int idx = getChildren().indexOf(tv);
+                        Node node = getChildren().get(idx);
+                        if (node instanceof TileView) {
+                            TileView tvOld = (TileView) node;
+                            tvOld.getTile().removeListener(tvOld);
+                        }
+                        TileView tvNew = new TileView(tNew, zone);
+                        tvNew.setGrey(tv.isGrey()); // copy grey value from old tile
+                        getChildren().set(idx, tvNew);
+                        return;
+                    }
                 }
             }
         }
     }
-    
+
 }

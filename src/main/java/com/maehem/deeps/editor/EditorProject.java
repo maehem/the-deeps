@@ -440,7 +440,7 @@ public final class EditorProject implements GameModel {
         currentTileUID = uid;
         this.currentSheetTile = t;
         log.log(Level.INFO, 
-                "Project current tile   tile:{1}",
+                "Project current tile   tile:{0}",
                 new Object[]{ t.getMnemonic() }
         );
         notifyProjectChanged(this,ChangeType.TILE);

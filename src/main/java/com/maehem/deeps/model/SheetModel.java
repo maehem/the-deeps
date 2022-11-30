@@ -108,8 +108,9 @@ public class SheetModel {
             for ( int x=0; x < getWidth(); x++ ) {
                 int tilenum = (getWidth()*y)+x;
                 //Tile t = new Tile("_" + tilenum, x, y, getPropsFor(tilenum));
-                Tile t = new Tile(null, '_', tilenum, x, y, getPropsFor(tilenum));
-                tiles.add(t);
+                String props = getPropsFor(tilenum);
+                log.log(Level.INFO, "    Props for tilenum: {0} ==>{1}", new Object[]{tilenum, props});
+                tiles.add(createTile(tilenum, x, y, props));
                 //TileView tv = new TileView(t, sheet ); //, x, y);
                 //tileGroup.getChildren().add(tv);
             }
@@ -118,6 +119,22 @@ public class SheetModel {
         this.tileMap = createTileMap(imgStream, imgStreamHiFi);
     }
 
+    private static Tile createTile( int index, int x, int y, String props ) {
+        String[] tf = props.split("\\."); // MAP.<flags>  , FIX.<flags>, ENT.<flags>
+        //log.log(Level.INFO, "    Split props: {0}", tf.toString());
+        switch ( tf[0] ) {
+            case "MAP":
+                return new MapTile(null, '_', index, x, y, tf[1]);
+            case "FIX":
+                return new FixtureTile(null, '_', index, x, y, tf[1]);
+            case "ENT":
+                return new EntityTile(null, '_', index, x, y, tf[1]);
+        }
+        
+        log.log(Level.SEVERE, "Could not create tile for {0}!", tf[0]);
+        return null;
+    }
+    
     private Image createTileMap(InputStream is, InputStream isHiFi) {
         // Get a raw instance of the image to determine its width and height.
         Image image = new Image(is);

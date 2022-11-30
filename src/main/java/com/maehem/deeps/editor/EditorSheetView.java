@@ -16,6 +16,7 @@
  */
 package com.maehem.deeps.editor;
 
+import com.maehem.deeps.model.MapTile;
 import com.maehem.deeps.model.SheetModel;
 import com.maehem.deeps.model.Tile;
 import com.maehem.deeps.view.TileView;
@@ -211,7 +212,7 @@ public class EditorSheetView extends VBox implements EditorProjectListener {
     @Override
     public void projectStateChanged(EditorProject p, ChangeType type) {
         if ( type == ChangeType.FUNC ) {
-            log.log(Level.INFO, "EditorSheetView function changed.");
+            log.log(Level.FINE, "EditorSheetView function changed.");
             // update greyed out tiles
             for ( Node n: tileGroup.getChildren()) {
                 if ( n instanceof TileView ) {
@@ -221,10 +222,12 @@ public class EditorSheetView extends VBox implements EditorProjectListener {
                             tv.setGrey(false);
                             break;
                         case STAMP_BASE:
-                            tv.setGrey(!tv.getTile().isMapTile());
+                            //tv.setGrey(!tv.getTile().isMapTile());
+                            tv.setGrey(!(tv.getTile() instanceof MapTile));
                             break;
                         case STAMP_ITEM:
-                            tv.setGrey(tv.getTile().isMapTile());
+                            tv.setGrey(tv.getTile() instanceof MapTile);
+                            //tv.setGrey(tv.getTile().isMapTile());
                             break;
                     }
                 } else {

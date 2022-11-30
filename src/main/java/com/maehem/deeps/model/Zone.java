@@ -54,7 +54,9 @@ public class Zone {
     private int width;
     private int height;
     private Tile[][] baseTile;
-    private Tile[][] itemTile;
+    //private Tile[][] itemTile;
+    
+    private ArrayList<FixtureTile> fixtures = new ArrayList<>();
 
 //    public Zone( GameModel gm ) {
 //        this(gm, "Unnamed", WIDTH, HEIGHT);
@@ -67,14 +69,14 @@ public class Zone {
         this.width = width;
         this.height = height;
         this.baseTile = new Tile[height][width];
-        this.itemTile = new Tile[height][width];
+//        this.itemTile = new Tile[height][width];
 
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 //baseTile[y][x] = new Tile("A00", x, y, null );
                 //itemTile[y][x] = new Tile("A00", x, y, null );
-                baseTile[y][x] = new Tile(this, 0, x, y, null );
-                itemTile[y][x] = new Tile(this, 0, x, y, null );
+                baseTile[y][x] = new MapTile(this, 0, x, y, null );
+                //itemTile[y][x] = new Tile(this, 0, x, y, null );
             }
         }
     }
@@ -82,7 +84,7 @@ public class Zone {
     private Zone( GameModel gm, String name, 
             HashMap<Character, Long> sheetMap, 
             ArrayList<String> base,
-            ArrayList<String> item,
+            //ArrayList<String> item,
             Properties flags
     ) {
         this.gameModel = gm;
@@ -96,14 +98,14 @@ public class Zone {
         this.width = base.get(0).split(" ").length;
         this.height = base.size();
         baseTile = new Tile[height][width];
-        itemTile = new Tile[height][width];
+        //itemTile = new Tile[height][width];
         
         for ( int y=0; y<height; y++ ) {
             String[] baseRow = base.get(y).split(" ");
-            String[] itemRow = item.get(y).split(" ");
+            //String[] itemRow = item.get(y).split(" ");
             for ( int x = 0; x<width; x++ ) {
                 String baseCode = baseRow[x];
-                String itemCode = itemRow[x];
+                //String itemCode = itemRow[x];
                 Long sheetUid = sheetMap.get(baseCode.charAt(0));
                 SheetModel sheet = gm.getSheet(sheetUid);
                 
@@ -122,18 +124,41 @@ public class Zone {
                     log.log(Level.SEVERE, "Could not clone uid:" + sheetUid + ":" + baseCode, ex);
                 }
                 
-                try {
+//                try {
+//                    // Clone the tile from the sheet.
+//                    Tile sheetItemTile = (Tile) sheet.getTile(
+//                            Integer.parseInt(itemCode.substring(1))
+//                    ).clone();
+//                    sheetItemTile.setXY(x,y);
+//                    sheetItemTile.setSheet(itemCode.charAt(0));
+//                    String pFlags = flags.getProperty(ITEM_PROP_KEY + (y*width+x));
+//                    sheetItemTile.applyFlags( pFlags );                    
+//                    this.itemTile[y][x] = sheetItemTile;
+//                } catch (CloneNotSupportedException ex) {
+//                    log.log(Level.SEVERE, "Could not clone uid:" + sheetUid + ":" + itemCode, ex);
+//                }
                     // Clone the tile from the sheet.
-                    Tile sheetItemTile = (Tile) sheet.getTile(
-                            Integer.parseInt(itemCode.substring(1))
-                    ).clone();
-                    sheetItemTile.setXY(x,y);
-                    sheetItemTile.setSheet(itemCode.charAt(0));
-                    String pFlags = flags.getProperty(ITEM_PROP_KEY + (y*width+x));
-                    sheetItemTile.applyFlags( pFlags );                    
-                    this.itemTile[y][x] = sheetItemTile;
-                } catch (CloneNotSupportedException ex) {
-                    log.log(Level.SEVERE, "Could not clone uid:" + sheetUid + ":" + itemCode, ex);
+                String pFlags = flags.getProperty(ITEM_PROP_KEY + (y * width + x));
+                if (pFlags != null) {
+                    String mnemonic = pFlags.split(":")[0];
+                    try {
+
+                        Tile sheetItemTile = (Tile) sheet.getTile(
+                                Integer.parseInt(mnemonic.substring(1))
+                        ).clone();
+                        if (sheetItemTile instanceof FixtureTile) {
+                            sheetItemTile.setXY(x, y);
+                            sheetItemTile.setSheet(mnemonic.charAt(0));
+                            sheetItemTile.applyFlags(pFlags.substring(pFlags.indexOf(":") + 1));
+                            //this.itemTile[y][x] = sheetItemTile;
+                            fixtures.add((FixtureTile) sheetItemTile);
+                        } else {
+                            log.log(Level.SEVERE, "Item tile at {0},{1} is not a Fixture Tile! Obj:{2}",
+                                    new Object[]{x, y, sheetItemTile});
+                        }
+                    } catch (CloneNotSupportedException ex) {
+                        log.log(Level.SEVERE, "Could not clone uid:" + sheetUid + ":" + mnemonic, ex);
+                    }
                 }
             }
         }
@@ -168,24 +193,27 @@ public class Zone {
             case BASE:
                 return baseTile[y][x];
             case ITEM:
-                return itemTile[y][x];
+                //return itemTile[y][x];
+                return getFixtureTile(x, y);
             default:
                 return null;
         }
     }
     
-    public void setTile( TileType type, int x, int y, Tile t ) {
-        switch( type ) {
-            case BASE:
-                t.setXY(x,y);
-                baseTile[y][x] = t;
-                break;
-            case ITEM:
-                t.setXY(x,y);
-                itemTile[y][x] = t;
-                break;
-        }
-    }
+//    public void setTile( TileType type, int x, int y, Tile t ) {
+//        switch( type ) {
+//            case BASE:
+//                t.setXY(x,y);
+//                baseTile[y][x] = t;
+//                break;
+//            case ITEM:
+//                t.setXY(x,y);
+//                //itemTile[y][x] = t;
+//                fixtures.remove(getFixtureTile(x, y));
+//                fixtures.add(t);
+//                break;
+//        }
+//    }
 
     /**
      * Swap existing tile for a newer one. 
@@ -197,6 +225,13 @@ public class Zone {
      * @param t the new tile.
      */
     public void swapTile(TileType type, int x, int y, Tile t) {
+        if ( t instanceof MapTile ) {
+            log.log(Level.INFO, "Swapping a MapTile.");
+        } else if ( t instanceof FixtureTile ) {
+            log.log(Level.INFO, "Swapping a FixtureTile.");
+        } else {
+            log.log( Level.INFO, "Swapping a unknown type tile.");
+        }
         Tile oldTile = null;
         switch( type ) {
             case BASE:
@@ -206,9 +241,12 @@ public class Zone {
                 baseTile[y][x] = t;
                 break;
             case ITEM:
-                oldTile = itemTile[y][x];
+                //oldTile = itemTile[y][x];
+                oldTile = getFixtureTile(x, y);
                 t.setXY(x,y);
-                itemTile[y][x] = t;
+                fixtures.remove((FixtureTile)oldTile);
+                fixtures.add((FixtureTile)t);
+                //itemTile[y][x] = t;
                 break;
         }
         
@@ -285,27 +323,27 @@ public class Zone {
             throw new ZoneFileFormatException("'Base Rows' section did not parse! Check Zone file.");
         }
         
-        while ( line != null && !line.startsWith("# Item Tiles") ) {
-            line = br.readLine();
-        }
+//        while ( line != null && !line.startsWith("# Item Tiles") ) {
+//            line = br.readLine();
+//        }
+//        
+//        if ( line == null ) {
+//            throw new ZoneFileFormatException("Could not find '# Item Tiles' header!");
+//        }
+//        log.log(Level.FINER, "    found 'Item Tiles.'");
+//        line = br.readLine();
+//        while ( line != null && line.matches("^[A-Z].*$") ) { // line must start with char A-Z
+//            log.log(Level.FINER, "        read Item Tile line.");
+//            itemRows.add(line);
+//            line = br.readLine();
+//        }
+//        if ( itemRows.isEmpty() ) {
+//            throw new ZoneFileFormatException("'Item Rows' section did not parse! Check Zone file.");
+//        }
         
-        if ( line == null ) {
-            throw new ZoneFileFormatException("Could not find '# Item Tiles' header!");
-        }
-        log.log(Level.FINER, "    found 'Item Tiles.'");
-        line = br.readLine();
-        while ( line != null && line.matches("^[A-Z].*$") ) { // line must start with char A-Z
-            log.log(Level.FINER, "        read Item Tile line.");
-            itemRows.add(line);
-            line = br.readLine();
-        }
-        if ( itemRows.isEmpty() ) {
-            throw new ZoneFileFormatException("'Item Rows' section did not parse! Check Zone file.");
-        }
-        
-        if ( baseRows.size() != itemRows.size() ) {
-            log.log(Level.WARNING, "    Base Rows count and Item rows count don't match!");
-        }
+//        if ( baseRows.size() != itemRows.size() ) {
+//            log.log(Level.WARNING, "    Base Rows count and Item rows count don't match!");
+//        }
         
         // Rest of file is properties.
         Properties p = new Properties();
@@ -313,7 +351,8 @@ public class Zone {
         log.log(Level.INFO, "    Found {0} properties", p.size());
         
         
-        return new Zone(gm, name, sheetMap, baseRows, itemRows, p);        
+        //return new Zone(gm, name, sheetMap, baseRows, itemRows, p);        
+        return new Zone(gm, name, sheetMap, baseRows, p);        
     }
     
     /**
@@ -345,19 +384,18 @@ public class Zone {
                 bw.newLine();
             }
 
-            bw.newLine();
-            bw.write("# Item Tiles");
-            bw.newLine();
-            for (int y = 0; y < height; y++) {
-                for (int x = 0; x < width; x++) {
-                    bw.write(itemTile[y][x].getMnemonic());
-                    bw.write(" ");
-                }
-                bw.newLine();
-            }
+//            bw.newLine();
+//            bw.write("# Item Tiles");
+//            bw.newLine();
+//            for (int y = 0; y < height; y++) {
+//                for (int x = 0; x < width; x++) {
+//                    bw.write(itemTile[y][x].getMnemonic());
+//                    bw.write(" ");
+//                }
+//                bw.newLine();
+//            }
             
             bw.newLine();
-            
             // Write base tile properties
             bw.write("# Base Tile Flags");
             bw.newLine();
@@ -366,18 +404,35 @@ public class Zone {
                     bw.write(BASE_PROP_KEY + (y*width+x) + " = " + baseTile[y][x].getFlags());
                     bw.newLine();
                 }
-                bw.newLine(); // Gap after every row to make it easier to read.
+                bw.newLine();
             }
             
+//            // Write item tile properties
+//            bw.write("# Item Tile Flags");
+//            bw.newLine();
+//            for (int y = 0; y < height; y++) {
+//                for (int x = 0; x < width; x++) {
+//                    
+//                    bw.write(ITEM_PROP_KEY + (y*width+x) + " = " + itemTile[y][x].getFlags());
+//                    bw.newLine(); // Gap after every row to make it easier to read.
+//                }
+//                bw.newLine();
+//            }
             // Write item tile properties
             bw.write("# Item Tile Flags");
             bw.newLine();
             for (int y = 0; y < height; y++) {
                 for (int x = 0; x < width; x++) {
-                    bw.write(ITEM_PROP_KEY + (y*width+x) + " = " + itemTile[y][x].getFlags());
-                    bw.newLine(); // Gap after every row to make it easier to read.
+                    FixtureTile t = getFixtureTile(x, y);
+                    if ( t != null ) {
+                        bw.write(ITEM_PROP_KEY + (y*width+x) + " = " + 
+                                t.getMnemonic() + ":" +
+                                t.getFlags()
+                        );     
+                    }
+                    bw.newLine();
                 }
-                bw.newLine();
+                bw.newLine(); // Gap at each chunk of lines.
             }
             
             
@@ -425,5 +480,14 @@ public class Zone {
         listeners.add(l);
     }
     
+    public FixtureTile getFixtureTile( int x, int y ) {
+        for( FixtureTile t: fixtures ) {
+            if ( t.getX() == x && t.getY() == y ) {
+                return t;
+            }
+        }
+        
+        return null;
+    }
     
 }

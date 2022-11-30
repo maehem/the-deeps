@@ -17,6 +17,7 @@
 package com.maehem.deeps.editor;
 
 import static com.maehem.deeps.Deeps.log;
+import com.maehem.deeps.model.MapTile;
 import com.maehem.deeps.model.SheetModel;
 import com.maehem.deeps.model.Tile;
 import com.maehem.deeps.model.Zone;
@@ -146,15 +147,15 @@ public class EditorZoneEditor extends ScrollPane implements EditorProjectListene
         );
     }
     
-    private void doStampBase(MouseEvent t, Zone.TileType f ) {
+    private void doStampBase(MouseEvent mevt, Zone.TileType f ) {
         double tileSize = 16;
         if (getCursor() instanceof ImageCursor) {
             ImageCursor c = (ImageCursor) getCursor();
             tileSize = c.getImage().getWidth();
             log.log(Level.FINER, "Tile Size: " + tileSize);
         }
-        int x = (int) (t.getX() / tileSize);
-        int y = (int) (t.getY() / tileSize);
+        int x = (int) (mevt.getX() / tileSize);
+        int y = (int) (mevt.getY() / tileSize);
         log.log(Level.INFO,
                 "Stamp at: {0}x{1}",
                 new Object[]{x, y});
@@ -190,7 +191,7 @@ public class EditorZoneEditor extends ScrollPane implements EditorProjectListene
 
     public void setFunction( Function f ) {
         this.function = f;
-        log.log(Level.INFO, 
+        log.log(Level.FINE, 
                 "Zone Editor [{0}] set function to: {1}", 
                 new Object[]{zone.getName(), f.name()}
         );
@@ -209,10 +210,12 @@ public class EditorZoneEditor extends ScrollPane implements EditorProjectListene
                         tv.setGrey(false);                        
                         break;
                     case STAMP_BASE:
-                        tv.setGrey(!tv.getTile().isMapTile());
+                        //tv.setGrey(!tv.getTile().isMapTile());
+                        tv.setGrey( !(tv.getTile() instanceof MapTile) );
                         break;
                     case STAMP_ITEM:
-                        tv.setGrey(tv.getTile().isMapTile());
+                        //tv.setGrey(tv.getTile().isMapTile());
+                        tv.setGrey( tv.getTile() instanceof MapTile );
                         break;
                 }
             }
@@ -250,8 +253,8 @@ public class EditorZoneEditor extends ScrollPane implements EditorProjectListene
             case SELECT:
                     setCursor(Cursor.DEFAULT);
                 break;
-                case STAMP_BASE:
-                case STAMP_ITEM:
+            case STAMP_BASE:
+            case STAMP_ITEM:
                     setCursorStamp();
                 break;
         }
@@ -269,7 +272,7 @@ public class EditorZoneEditor extends ScrollPane implements EditorProjectListene
             });
             // Get image for current selected tile.
             //Tile tm = new Tile(currentTile, null);
-            TileView t = new TileView(clone, zone ); //, 0, 0);
+            TileView t = new TileView(clone, zone.getSheet(key) ); //, 0, 0);
             t.setOpacity(0.7);
             SnapshotParameters sp = new SnapshotParameters();
             
@@ -288,7 +291,7 @@ public class EditorZoneEditor extends ScrollPane implements EditorProjectListene
     
     @Override
     public void projectStateChanged(EditorProject p, ChangeType type) {
-        log.log(Level.INFO, "Zone [{0}] project state change: {1}", 
+        log.log(Level.FINE, "Zone [{0}] project state change: {1}", 
                 new Object[]{zone.getName(),type.name()});
         if ( type == ChangeType.TILE ) {
             updateCursor();

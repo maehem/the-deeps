@@ -17,6 +17,7 @@
 package com.maehem.deeps.view;
 
 import static com.maehem.deeps.Deeps.log;
+import com.maehem.deeps.model.MapTile;
 import com.maehem.deeps.model.SheetModel;
 import com.maehem.deeps.model.Tile;
 import com.maehem.deeps.model.TileListener;
@@ -103,7 +104,7 @@ public class TileView extends Group implements TileListener {
     
     @Override
     public void tileCodeChanged(Tile tile) {
-        log.log(Level.INFO, "Tile code changed.{0},{1}  {2}:{3}", 
+        log.log(Level.INFO, "Tile code changed. {0},{1}  {2}:{3}", 
                 new Object[]{
                     tile.getX(), tile.getY(),
                     tile.getMnemonic(), tile.getDescription()
@@ -119,14 +120,16 @@ public class TileView extends Group implements TileListener {
     }
     
     private void updateTileVisible() {
-        if ( !tile.isMapTile() ) {
+        if ( !(tile instanceof MapTile ) ) {
+        //if ( !tile.isMapTile() ) {
             view.setVisible(tile.getIndex() > 0);
             greyOut.setVisible(tile.getIndex() > 0);
         }
     }
     
     public void setGrey( boolean b) {
-        if ( !tile.isMapTile() ) {
+        if ( !(tile instanceof MapTile ) ) {
+        //if ( !tile.isMapTile() ) {
             this.greyOut.setVisible(false);
             this.setOpacity(b?0.3:1.0);
         } else {
