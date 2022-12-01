@@ -17,7 +17,6 @@
 package com.maehem.deeps.model;
 
 import static com.maehem.deeps.Deeps.log;
-import static com.maehem.deeps.model.Tile.BLOCKING_MAX;
 import java.util.logging.Level;
 
 /**
@@ -227,8 +226,10 @@ public class FixtureTile extends Tile {
         }        
     }
 
+    @Override
     public String getFlags() {
         StringBuilder sb = new StringBuilder(super.getFlags());
+        sb.append(":");
         
         if ( getAblation() != ABLATION_DEFAULT ) {
             sb.append("A").append(getAblation()).append(":");
@@ -251,7 +252,11 @@ public class FixtureTile extends Tile {
         if ( getWeapon() != WEAPON_DEFAULT ) {
             sb.append("W").append(getWeapon()).append(":");
         }
-        
+        if ( sb.lastIndexOf(":") == sb.length()-1 ) {
+            //log.log(Level.INFO, "Trim colon from end of flags: {0}", sb.toString());
+            //log.log(Level.INFO, "    ===> {0}", sb.substring(0, sb.length()-1));
+            return sb.substring(0, sb.length()-1);
+        }
         return sb.toString();
     }
 }

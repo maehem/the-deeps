@@ -183,33 +183,6 @@ public class Zone {
     public void setHeight(int height) {
         this.height = height;
     }
-    
-//    public Tile getTile(TileType t, int x, int y ) {
-//        switch (t) {
-//            case BASE:
-//                return baseTile[y][x];
-//            case ITEM:
-//                //return itemTile[y][x];
-//                return getFixtureTile(x, y);
-//            default:
-//                return null;
-//        }
-//    }
-    
-//    public void setTile( TileType type, int x, int y, Tile t ) {
-//        switch( type ) {
-//            case BASE:
-//                t.setXY(x,y);
-//                baseTile[y][x] = t;
-//                break;
-//            case ITEM:
-//                t.setXY(x,y);
-//                //itemTile[y][x] = t;
-//                fixtures.remove(getFixtureTile(x, y));
-//                fixtures.add(t);
-//                break;
-//        }
-//    }
 
     /**
      * Swap existing tile for a newer one. 
@@ -246,23 +219,6 @@ public class Zone {
         } else {
             log.log( Level.WARNING, "Swapping a unknown type tile.");
         }
-//        switch( type ) {
-//            case BASE:
-//                oldTile = baseTile[y][x];
-//                oldTile.retire();
-//                t.setXY(x,y);
-//                baseTile[y][x] = t;
-//                break;
-//            case ITEM:
-//                //oldTile = itemTile[y][x];
-//                oldTile = getFixtureTile(x, y);
-//                t.setXY(x,y);
-//                fixtures.remove((FixtureTile)oldTile);
-//                fixtures.add((FixtureTile)t);
-//                //itemTile[y][x] = t;
-//                break;
-//        }
-        
     }
 
     /**
@@ -279,7 +235,7 @@ public class Zone {
     public static Zone load(GameModel gm, InputStream in ) throws IOException, ZoneFileFormatException {
         HashMap<Character, Long> sheetMap = new HashMap<>();
         ArrayList<String> baseRows = new ArrayList<>();
-        ArrayList<String> itemRows = new ArrayList<>();
+        //ArrayList<String> itemRows = new ArrayList<>();
         
         // Read each line
         BufferedReader br = new BufferedReader(new InputStreamReader(in));
@@ -288,7 +244,6 @@ public class Zone {
 
         // Lines with hash '#' are comments.
         // Look for line match "# Base Tiles"
-        //line = br.readLine();
         while ( line != null && !line.startsWith("# name:")) {
             line = br.readLine();
         }
@@ -313,7 +268,6 @@ public class Zone {
             sheetMap.put(idxArray[1].charAt(0), Long.valueOf(idxArray[2]));
             line = br.readLine();
         }
-       
         
         line = br.readLine();        
         while ( line != null && !line.startsWith("# Base Tiles") ) {
@@ -334,35 +288,11 @@ public class Zone {
             throw new ZoneFileFormatException("'Base Rows' section did not parse! Check Zone file.");
         }
         
-//        while ( line != null && !line.startsWith("# Item Tiles") ) {
-//            line = br.readLine();
-//        }
-//        
-//        if ( line == null ) {
-//            throw new ZoneFileFormatException("Could not find '# Item Tiles' header!");
-//        }
-//        log.log(Level.FINER, "    found 'Item Tiles.'");
-//        line = br.readLine();
-//        while ( line != null && line.matches("^[A-Z].*$") ) { // line must start with char A-Z
-//            log.log(Level.FINER, "        read Item Tile line.");
-//            itemRows.add(line);
-//            line = br.readLine();
-//        }
-//        if ( itemRows.isEmpty() ) {
-//            throw new ZoneFileFormatException("'Item Rows' section did not parse! Check Zone file.");
-//        }
-        
-//        if ( baseRows.size() != itemRows.size() ) {
-//            log.log(Level.WARNING, "    Base Rows count and Item rows count don't match!");
-//        }
-        
         // Rest of file is properties.
         Properties p = new Properties();
         p.load(br);
         log.log(Level.INFO, "    Found {0} properties", p.size());
         
-        
-        //return new Zone(gm, name, sheetMap, baseRows, itemRows, p);        
         return new Zone(gm, name, sheetMap, baseRows, p);        
     }
     
@@ -394,19 +324,8 @@ public class Zone {
                 }
                 bw.newLine();
             }
-
-//            bw.newLine();
-//            bw.write("# Item Tiles");
-//            bw.newLine();
-//            for (int y = 0; y < height; y++) {
-//                for (int x = 0; x < width; x++) {
-//                    bw.write(itemTile[y][x].getMnemonic());
-//                    bw.write(" ");
-//                }
-//                bw.newLine();
-//            }
-            
             bw.newLine();
+            
             // Write base tile properties
             bw.write("# Base Tile Flags");
             bw.newLine();
@@ -418,19 +337,8 @@ public class Zone {
                 bw.newLine();
             }
             
-//            // Write item tile properties
-//            bw.write("# Item Tile Flags");
-//            bw.newLine();
-//            for (int y = 0; y < height; y++) {
-//                for (int x = 0; x < width; x++) {
-//                    
-//                    bw.write(ITEM_PROP_KEY + (y*width+x) + " = " + itemTile[y][x].getFlags());
-//                    bw.newLine(); // Gap after every row to make it easier to read.
-//                }
-//                bw.newLine();
-//            }
             // Write item tile properties
-            bw.write("# Item Tile Flags");
+            bw.write("# Fixture Tile Flags");
             bw.newLine();
             for (int y = 0; y < height; y++) {
                 for (int x = 0; x < width; x++) {
@@ -440,10 +348,9 @@ public class Zone {
                                 t.getMnemonic() + ":" +
                                 t.getFlags()
                         );     
+                        bw.newLine();
                     }
-                    bw.newLine();
                 }
-                bw.newLine(); // Gap at each chunk of lines.
             }
             
             
