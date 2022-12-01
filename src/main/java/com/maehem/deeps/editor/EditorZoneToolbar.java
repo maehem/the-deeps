@@ -101,11 +101,11 @@ public class EditorZoneToolbar extends ToolBar{
             log.log(Level.INFO, "Toggle Select Button");
         });
         stampBaseButton.setOnAction((t) -> {
-            editor.setFunction(EditorZoneEditor.Function.STAMP_BASE);
+            editor.setFunction(EditorZoneEditor.Function.STAMP_MAP);
             log.log(Level.INFO, "Toggle Stamp Base Button");
         });
         stampItemButton.setOnAction((t) -> {
-            editor.setFunction(EditorZoneEditor.Function.STAMP_ITEM);
+            editor.setFunction(EditorZoneEditor.Function.STAMP_FIXTURE);
             log.log(Level.INFO, "Toggle Stamp Item Button");
         });
         

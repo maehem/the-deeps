@@ -43,7 +43,7 @@ import javafx.scene.transform.Scale;
  * @author Mark J Koch ( GitHub @maehem)
  */
 public class EditorZoneEditor extends ScrollPane implements EditorProjectListener {
-    public static enum Function { SELECT, STAMP_BASE, STAMP_ITEM }
+    public static enum Function { SELECT, STAMP_MAP, STAMP_FIXTURE }
     
     private final Zone zone;
     private final ZoneView zoneView;
@@ -113,10 +113,10 @@ public class EditorZoneEditor extends ScrollPane implements EditorProjectListene
                 case SELECT:
                     updatePropsHighlight(t, dim);
                     break;
-                case STAMP_BASE:
+                case STAMP_MAP:
                     doStampBase(t, MapTile.class);
                     break;
-                case STAMP_ITEM:
+                case STAMP_FIXTURE:
                     doStampBase(t, FixtureTile.class);                    
                     break;
                 default:
@@ -139,13 +139,6 @@ public class EditorZoneEditor extends ScrollPane implements EditorProjectListene
         }
         propsHighlight.setLayoutY(dim * y);
 
-//        // tell project what tiles at this location.
-//        project.setFocusedTile(Zone.TileType.BASE,
-//                zone.getTile(Zone.TileType.BASE, x, y)
-//        );
-//        project.setFocusedTile(Zone.TileType.ITEM,
-//                zone.getTile(Zone.TileType.ITEM, x, y)
-//        );
         zoneView.setFocusX(x);
         zoneView.setFocusY(y);
         project.setFocusedMapTile(zone.getMapTile(x, y));
@@ -217,43 +210,15 @@ public class EditorZoneEditor extends ScrollPane implements EditorProjectListene
                     case SELECT:
                         tv.setGrey(false);                        
                         break;
-                    case STAMP_BASE:
-                        //tv.setGrey(!tv.getTile().isMapTile());
+                    case STAMP_MAP:
                         tv.setGrey( !(tv.getTile() instanceof MapTile) );
                         break;
-                    case STAMP_ITEM:
-                        //tv.setGrey(tv.getTile().isMapTile());
+                    case STAMP_FIXTURE:
                         tv.setGrey( tv.getTile() instanceof MapTile );
                         break;
                 }
             }
         }
-//        switch ( f ) {
-//            case SELECT:
-//                for ( Node n: zoneView.getChildren() ) {
-//                    if ( n instanceof TileView ) {
-//                        TileView tv = (TileView)n;
-//                        tv.setGrey(false);
-//                    }
-//                }
-//                break;
-//                case STAMP_BASE:
-//                    for ( Node n: zoneView.getChildren() ) {
-//                        if ( n instanceof TileView ) {
-//                            TileView tv = (TileView)n;
-//                            tv.setGrey(!tv.getTile().isMapTile());
-//                        }
-//                    }
-//                break;
-//                case STAMP_ITEM:
-//                    for ( Node n: zoneView.getChildren() ) {
-//                        if ( n instanceof TileView ) {
-//                            TileView tv = (TileView)n;
-//                            tv.setGrey(tv.getTile().isMapTile());
-//                        }
-//                    }                
-//                break;
-//        }
     }
     
     private void updateCursor() {
@@ -261,8 +226,8 @@ public class EditorZoneEditor extends ScrollPane implements EditorProjectListene
             case SELECT:
                     setCursor(Cursor.DEFAULT);
                 break;
-            case STAMP_BASE:
-            case STAMP_ITEM:
+            case STAMP_MAP:
+            case STAMP_FIXTURE:
                     setCursorStamp();
                 break;
         }

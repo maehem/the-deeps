@@ -20,7 +20,6 @@ import com.maehem.deeps.model.MapTile;
 import com.maehem.deeps.model.SheetModel;
 import com.maehem.deeps.model.Tile;
 import com.maehem.deeps.view.TileView;
-import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.geometry.Insets;
@@ -53,7 +52,7 @@ public class EditorSheetView extends VBox implements EditorProjectListener {
     private final StackPane imgViewGroup;
     private final ScrollPane sp;
     private final Rectangle selectedRect;
-    private final ArrayList<Rectangle> tileGrey = new ArrayList<>();
+    //private final ArrayList<Rectangle> tileGrey = new ArrayList<>();
     private final Group rectG;
     private final Rectangle area;
     private final Group scalableImageView;
@@ -93,7 +92,6 @@ public class EditorSheetView extends VBox implements EditorProjectListener {
         this.selectedRect.setVisible(false);
 
         // Upper left corner is 0,0
-        //selectedRect.setTranslateX((sheet.getSize())); // do i need this?
         selectedRect.setStroke(Color.valueOf("#00bb00"));
         selectedRect.setStrokeWidth(2.0);
         selectedRect.setStrokeType(StrokeType.INSIDE);
@@ -112,7 +110,6 @@ public class EditorSheetView extends VBox implements EditorProjectListener {
             for ( int x=0; x<sheet.getWidth(); x++ ) {
                 int tilenum = (sheet.getWidth()*y)+x;
                 Tile t = sheet.getTile(tilenum);
-                //Tile t = new Tile("_" + tilenum, x, y, sm.getPropsFor(tilenum));
                 TileView tv = new TileView(t, sheet ); //, x, y);
                 tileGroup.getChildren().add(tv);
             }
@@ -138,9 +135,7 @@ public class EditorSheetView extends VBox implements EditorProjectListener {
             selectedRect.setTranslateX((selectedX*tSize));
             selectedRect.setTranslateY((selectedY*tSize));
             selectedRect.setVisible(true);
-            //project.setCurrentTile(sheet.getUID(), sheet.getWidth()*selectedY + selectedX);
             project.setCurrentSheetTile(sheet.getUID(), getTileAt(selectedX, selectedY));
-            
         });
         
         setZoom(getZoom()); // Cause proper scale of image.
@@ -179,8 +174,6 @@ public class EditorSheetView extends VBox implements EditorProjectListener {
         rectG.setScaleX(zoom);
         rectG.setScaleY(zoom);
         selectedRect.setStrokeWidth(2.0/zoom);
-
-        //log.log(Level.INFO, "Width is: " + getWidth() );
         
         log.log(Level.INFO, "Zoom set to: {0}", getZoom());
     }
@@ -221,13 +214,11 @@ public class EditorSheetView extends VBox implements EditorProjectListener {
                         case SELECT:
                             tv.setGrey(false);
                             break;
-                        case STAMP_BASE:
-                            //tv.setGrey(!tv.getTile().isMapTile());
+                        case STAMP_MAP:
                             tv.setGrey(!(tv.getTile() instanceof MapTile));
                             break;
-                        case STAMP_ITEM:
+                        case STAMP_FIXTURE:
                             tv.setGrey(tv.getTile() instanceof MapTile);
-                            //tv.setGrey(tv.getTile().isMapTile());
                             break;
                     }
                 } else {
