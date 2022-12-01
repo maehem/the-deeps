@@ -17,6 +17,7 @@
 package com.maehem.deeps.editor;
 
 import static com.maehem.deeps.Deeps.log;
+import com.maehem.deeps.model.FixtureTile;
 import com.maehem.deeps.model.MapTile;
 import com.maehem.deeps.model.SheetModel;
 import com.maehem.deeps.model.Tile;
@@ -66,7 +67,7 @@ public class EditorZoneEditor extends ScrollPane implements EditorProjectListene
         this.project =  EditorProject.getInstance();
         project.addListener(this);
         
-        Tile t0 = zone.getTile(Zone.TileType.BASE, 0, 0);
+        Tile t0 = zone.getMapTile(0, 0);
         SheetModel sheet = zone.getSheet(t0.getSheet());
         int dim = sheet.getSize();
 
@@ -113,10 +114,10 @@ public class EditorZoneEditor extends ScrollPane implements EditorProjectListene
                     updatePropsHighlight(t, dim);
                     break;
                 case STAMP_BASE:
-                    doStampBase(t, Zone.TileType.BASE);
+                    doStampBase(t, MapTile.class);
                     break;
                 case STAMP_ITEM:
-                    doStampBase(t, Zone.TileType.ITEM);                    
+                    doStampBase(t, FixtureTile.class);                    
                     break;
                 default:
                         
@@ -138,21 +139,25 @@ public class EditorZoneEditor extends ScrollPane implements EditorProjectListene
         }
         propsHighlight.setLayoutY(dim * y);
 
-        // tell project what tiles at this location.
-        project.setFocusedTile(Zone.TileType.BASE,
-                zone.getTile(Zone.TileType.BASE, x, y)
-        );
-        project.setFocusedTile(Zone.TileType.ITEM,
-                zone.getTile(Zone.TileType.ITEM, x, y)
-        );
+//        // tell project what tiles at this location.
+//        project.setFocusedTile(Zone.TileType.BASE,
+//                zone.getTile(Zone.TileType.BASE, x, y)
+//        );
+//        project.setFocusedTile(Zone.TileType.ITEM,
+//                zone.getTile(Zone.TileType.ITEM, x, y)
+//        );
+        zoneView.setFocusX(x);
+        zoneView.setFocusY(y);
+        project.setFocusedMapTile(zone.getMapTile(x, y));
+        project.setFocusedFixtureTile(zone.getFixtureTile(x, y));
     }
     
-    private void doStampBase(MouseEvent mevt, Zone.TileType f ) {
+    private void doStampBase(MouseEvent mevt, Class clazz ) {
         double tileSize = 16;
         if (getCursor() instanceof ImageCursor) {
             ImageCursor c = (ImageCursor) getCursor();
             tileSize = c.getImage().getWidth();
-            log.log(Level.FINER, "Tile Size: " + tileSize);
+            log.log(Level.FINER, "Tile Size: {0}", tileSize);
         }
         int x = (int) (mevt.getX() / tileSize);
         int y = (int) (mevt.getY() / tileSize);
@@ -165,10 +170,13 @@ public class EditorZoneEditor extends ScrollPane implements EditorProjectListene
             try {
                 //zone.swapTile(f, x, y, key + String.valueOf(project.getCurrentTileNum() ));
                 Tile clone = (Tile) project.getCurrentSheetTile().clone();
-                clone.setSheet(key);
-                
-                zone.swapTile(f, x, y, clone);
-                project.setEdited(true);
+                if( clone.getClass() == clazz  ) {
+                    clone.setSheet(key);
+                    zone.swapTile(x, y, clone);
+                    project.setEdited(true);
+                } else {
+                    log.log(Level.WARNING, "doStampBase():  Could not swap tiles as they are not the same class!");
+                }
             } catch (CloneNotSupportedException ex) {
                 Logger.getLogger(EditorZoneEditor.class.getName()).log(Level.SEVERE, null, ex);
             }

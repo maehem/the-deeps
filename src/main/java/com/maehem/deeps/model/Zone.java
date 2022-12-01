@@ -43,7 +43,7 @@ public class Zone {
     private static final String BASE_PROP_KEY = "base.";
     private static final String ITEM_PROP_KEY = "item.";
 
-    public static enum TileType { BASE, ITEM };
+    //public static enum TileType { BASE, ITEM };
 
     private final ArrayList<ZoneListener> listeners = new ArrayList<>();
     
@@ -53,34 +53,42 @@ public class Zone {
     private String name;
     private int width;
     private int height;
-    private Tile[][] baseTile;
-    //private Tile[][] itemTile;
+    private MapTile[][] baseTile;
     
     private ArrayList<FixtureTile> fixtures = new ArrayList<>();
 
-//    public Zone( GameModel gm ) {
-//        this(gm, "Unnamed", WIDTH, HEIGHT);
-//    }
-//
-    
+    /**
+     * Construct a new Zone using data, usually from a dialog.
+     * 
+     * @param gm GameModel, usually the Zone editor.
+     * @param name of this Zone.
+     * @param width in cells.
+     * @param height in cells.
+     */
     public Zone(GameModel gm, String name, int width, int height) {
         this.gameModel = gm;
         this.name = name;
         this.width = width;
         this.height = height;
-        this.baseTile = new Tile[height][width];
-//        this.itemTile = new Tile[height][width];
+        this.baseTile = new MapTile[height][width];
 
+        // Full map with default tiles.
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
-                //baseTile[y][x] = new Tile("A00", x, y, null );
-                //itemTile[y][x] = new Tile("A00", x, y, null );
                 baseTile[y][x] = new MapTile(this, 0, x, y, null );
-                //itemTile[y][x] = new Tile(this, 0, x, y, null );
             }
         }
     }
 
+    /**
+     * Construct a zone from data read from a file.
+     * 
+     * @param gm GameModel, usually the game engine.
+     * @param name of the Zone
+     * @param sheetMap map of character index to UID for each sheet.
+     * @param base a row of mnemonics for the map.
+     * @param flags properties for map and other item tiles.
+     */
     private Zone( GameModel gm, String name, 
             HashMap<Character, Long> sheetMap, 
             ArrayList<String> base,
@@ -92,20 +100,14 @@ public class Zone {
         this.sheetMap.putAll(sheetMap);
         
         // split line and count elements.  Set Width.
-        
-        // read lines until line is ,commentm, blank or whitespace.
-        // Repeast for item tiles
         this.width = base.get(0).split(" ").length;
         this.height = base.size();
-        baseTile = new Tile[height][width];
-        //itemTile = new Tile[height][width];
+        baseTile = new MapTile[height][width];
         
         for ( int y=0; y<height; y++ ) {
             String[] baseRow = base.get(y).split(" ");
-            //String[] itemRow = item.get(y).split(" ");
             for ( int x = 0; x<width; x++ ) {
                 String baseCode = baseRow[x];
-                //String itemCode = itemRow[x];
                 Long sheetUid = sheetMap.get(baseCode.charAt(0));
                 SheetModel sheet = gm.getSheet(sheetUid);
                 
@@ -114,35 +116,29 @@ public class Zone {
                     Tile sheetBaseTile = (Tile) sheet.getTile(
                             Integer.parseInt(baseCode.substring(1))
                     ).clone();
-                    sheetBaseTile.setXY(x,y);
-                    sheetBaseTile.setSheet(baseCode.charAt(0));
-                    // Apply flags for this tile.
-                    String pFlags = flags.getProperty(BASE_PROP_KEY + (y*width+x));
-                    sheetBaseTile.applyFlags( pFlags );
-                    this.baseTile[y][x] = sheetBaseTile;
+                    if ( sheetBaseTile instanceof MapTile ) {
+                        sheetBaseTile.setXY(x,y);
+                        sheetBaseTile.setSheet(baseCode.charAt(0));
+                        // Apply flags for this tile.
+                        String pFlags = flags.getProperty(BASE_PROP_KEY + (y*width+x));
+                        sheetBaseTile.applyFlags( pFlags );
+                        this.baseTile[y][x] = (MapTile) sheetBaseTile;
+                    } else {
+                        log.log(Level.SEVERE, 
+                                "Zone constructor: Tile is NOT MapTile! class:{0}", 
+                                sheetBaseTile.getClass().getSimpleName()
+                        );
+                    }
                 } catch (CloneNotSupportedException ex) {
                     log.log(Level.SEVERE, "Could not clone uid:" + sheetUid + ":" + baseCode, ex);
                 }
                 
-//                try {
-//                    // Clone the tile from the sheet.
-//                    Tile sheetItemTile = (Tile) sheet.getTile(
-//                            Integer.parseInt(itemCode.substring(1))
-//                    ).clone();
-//                    sheetItemTile.setXY(x,y);
-//                    sheetItemTile.setSheet(itemCode.charAt(0));
-//                    String pFlags = flags.getProperty(ITEM_PROP_KEY + (y*width+x));
-//                    sheetItemTile.applyFlags( pFlags );                    
-//                    this.itemTile[y][x] = sheetItemTile;
-//                } catch (CloneNotSupportedException ex) {
-//                    log.log(Level.SEVERE, "Could not clone uid:" + sheetUid + ":" + itemCode, ex);
-//                }
-                    // Clone the tile from the sheet.
+                // Process any FixtureTile at this grid location
                 String pFlags = flags.getProperty(ITEM_PROP_KEY + (y * width + x));
                 if (pFlags != null) {
                     String mnemonic = pFlags.split(":")[0];
                     try {
-
+                        // Clone the tile from the sheet.
                         Tile sheetItemTile = (Tile) sheet.getTile(
                                 Integer.parseInt(mnemonic.substring(1))
                         ).clone();
@@ -150,10 +146,10 @@ public class Zone {
                             sheetItemTile.setXY(x, y);
                             sheetItemTile.setSheet(mnemonic.charAt(0));
                             sheetItemTile.applyFlags(pFlags.substring(pFlags.indexOf(":") + 1));
-                            //this.itemTile[y][x] = sheetItemTile;
                             fixtures.add((FixtureTile) sheetItemTile);
                         } else {
-                            log.log(Level.SEVERE, "Item tile at {0},{1} is not a Fixture Tile! Obj:{2}",
+                            log.log(Level.SEVERE, 
+                                    "Item tile at {0},{1} is not a Fixture Tile! Obj:{2}",
                                     new Object[]{x, y, sheetItemTile});
                         }
                     } catch (CloneNotSupportedException ex) {
@@ -188,17 +184,17 @@ public class Zone {
         this.height = height;
     }
     
-    public Tile getTile(TileType t, int x, int y ) {
-        switch (t) {
-            case BASE:
-                return baseTile[y][x];
-            case ITEM:
-                //return itemTile[y][x];
-                return getFixtureTile(x, y);
-            default:
-                return null;
-        }
-    }
+//    public Tile getTile(TileType t, int x, int y ) {
+//        switch (t) {
+//            case BASE:
+//                return baseTile[y][x];
+//            case ITEM:
+//                //return itemTile[y][x];
+//                return getFixtureTile(x, y);
+//            default:
+//                return null;
+//        }
+//    }
     
 //    public void setTile( TileType type, int x, int y, Tile t ) {
 //        switch( type ) {
@@ -219,39 +215,54 @@ public class Zone {
      * Swap existing tile for a newer one. 
      * Removes any listeners of old tile.
      * 
-     * @param type
      * @param x
      * @param y
      * @param t the new tile.
      */
-    public void swapTile(TileType type, int x, int y, Tile t) {
+    public void swapTile(/*TileType type,*/ int x, int y, Tile t ) {
+        Tile oldTile = null;
         if ( t instanceof MapTile ) {
             log.log(Level.INFO, "Swapping a MapTile.");
+            oldTile = baseTile[y][x];
+            oldTile.retire();
+            t.setXY(x,y);
+            baseTile[y][x] = (MapTile) t;
+            // Notify tile change.
+            notifyTileSwapped(oldTile, t);        
         } else if ( t instanceof FixtureTile ) {
             log.log(Level.INFO, "Swapping a FixtureTile.");
-        } else {
-            log.log( Level.INFO, "Swapping a unknown type tile.");
-        }
-        Tile oldTile = null;
-        switch( type ) {
-            case BASE:
-                oldTile = baseTile[y][x];
-                oldTile.retire();
-                t.setXY(x,y);
-                baseTile[y][x] = t;
-                break;
-            case ITEM:
-                //oldTile = itemTile[y][x];
-                oldTile = getFixtureTile(x, y);
-                t.setXY(x,y);
+            t.setXY(x,y);
+            oldTile = getFixtureTile(x, y);
+            if ( oldTile != null ) {
                 fixtures.remove((FixtureTile)oldTile);
-                fixtures.add((FixtureTile)t);
-                //itemTile[y][x] = t;
-                break;
+                log.log(Level.INFO, 
+                        "Removed existing FixtureTile at: {0}{1}", 
+                        new Object[]{oldTile.getX(), oldTile.getY()}
+                );
+            }
+            fixtures.add((FixtureTile)t);
+            // Notify tile change.
+            notifyTileSwapped(oldTile, t); 
+        } else {
+            log.log( Level.WARNING, "Swapping a unknown type tile.");
         }
+//        switch( type ) {
+//            case BASE:
+//                oldTile = baseTile[y][x];
+//                oldTile.retire();
+//                t.setXY(x,y);
+//                baseTile[y][x] = t;
+//                break;
+//            case ITEM:
+//                //oldTile = itemTile[y][x];
+//                oldTile = getFixtureTile(x, y);
+//                t.setXY(x,y);
+//                fixtures.remove((FixtureTile)oldTile);
+//                fixtures.add((FixtureTile)t);
+//                //itemTile[y][x] = t;
+//                break;
+//        }
         
-        // Notify tile change.
-        notifyTileSwapped(oldTile, t);        
     }
 
     /**
@@ -488,6 +499,10 @@ public class Zone {
         }
         
         return null;
+    }
+    
+    public MapTile getMapTile( int x, int y ) {
+        return baseTile[y][x];
     }
     
 }

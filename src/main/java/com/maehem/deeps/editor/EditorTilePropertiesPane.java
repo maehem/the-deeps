@@ -21,10 +21,8 @@ import com.maehem.deeps.model.EntityTile;
 import com.maehem.deeps.model.FixtureTile;
 import com.maehem.deeps.model.MapTile;
 import com.maehem.deeps.model.Tile;
-import com.maehem.deeps.model.Zone.TileType;
 import java.lang.reflect.Field;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -42,19 +40,22 @@ import javafx.scene.layout.VBox;
  */
 public class EditorTilePropertiesPane extends VBox implements EditorProjectListener {
 
-    private final TileType tileType;
+    //private final TileType tileType;
+    private final Class tileClass;
     private final EditorProject project;
     private final VBox widgets = new VBox();
     private Tile currentTile = null;
     private final Label titleLabel = new Label("Label");
     private final Label descriptionLabel = new Label("Description");
 
-    public EditorTilePropertiesPane(TileType type) {
-        this.tileType = type;
+    public EditorTilePropertiesPane(Class clazz) {
+        this.tileClass = clazz;
+        //this.tileType = type;
         project = EditorProject.getInstance();
         project.addListener(this);
 
-        titleLabel.setText(tileType.name());
+        //titleLabel.setText(tileType.name());
+        titleLabel.setText(tileClass.getSimpleName());
         VBox content = new VBox(
                 new HBox(titleLabel),
                 new HBox(descriptionLabel),
@@ -72,13 +73,14 @@ public class EditorTilePropertiesPane extends VBox implements EditorProjectListe
 
         if (currentTile == null) {
             // Place no-selected label
-            titleLabel.setText(tileType.name() + "  (No zone tile selected)");
+            //titleLabel.setText(tileType.name() + "  (No zone tile selected)");
+            titleLabel.setText(tileClass.getSimpleName() + "  (No zone tile selected)");
             descriptionLabel.setText("");
 
             widgets.getChildren().add(new Label("Nothing focused."));
         } else {
             // title bar        
-            titleLabel.setText(tileType.name()
+            titleLabel.setText(tileClass.getSimpleName()
                     + "  " + currentTile.getMnemonic()
                     + "  X:" + currentTile.getX()
                     + "  Y:" + currentTile.getY()
@@ -164,8 +166,14 @@ public class EditorTilePropertiesPane extends VBox implements EditorProjectListe
     @Override
     public void projectStateChanged(EditorProject p, ChangeType type) {
         if (type == ChangeType.FOCUS) {
-            Tile ct = p.getFocusedTile(tileType);
-            if (ct != currentTile) {
+            
+            Tile ct = null;
+            if ( tileClass == MapTile.class ) {
+                ct = p.getFocusedMapTile();
+            } else if ( tileClass == FixtureTile.class ) {
+                ct = p.getFocusedFixtureTile();
+            }
+            if (ct != null && ct != currentTile) {
                 log.log(Level.FINE, "Focus changed for properties tab.");
                 updateWidgets(ct);
             }

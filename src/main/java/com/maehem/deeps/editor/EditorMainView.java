@@ -16,8 +16,8 @@
  */
 package com.maehem.deeps.editor;
 
-import static com.maehem.deeps.model.Zone.TileType.BASE;
-import static com.maehem.deeps.model.Zone.TileType.ITEM;
+import com.maehem.deeps.model.FixtureTile;
+import com.maehem.deeps.model.MapTile;
 import java.io.IOException;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
@@ -66,8 +66,8 @@ public class EditorMainView {
         EditorProjectStatusPane statusBar = new EditorProjectStatusPane();
         
         // Right Pane
-        EditorTilePropertiesPane tileProperties = new EditorTilePropertiesPane(BASE);
-        EditorTilePropertiesPane itemProperties = new EditorTilePropertiesPane(ITEM);
+        EditorTilePropertiesPane tileProperties = new EditorTilePropertiesPane(MapTile.class);
+        EditorTilePropertiesPane itemProperties = new EditorTilePropertiesPane(FixtureTile.class);
         VBox rightBar = new VBox(tileProperties, itemProperties);
         rightBar.setMaxWidth(WIDTH/4.0);
         tileProperties.setFillWidth(true);

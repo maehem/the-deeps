@@ -446,37 +446,59 @@ public final class EditorProject implements GameModel {
         notifyProjectChanged(this,ChangeType.TILE);
     }
     
-    /**
-     * 
-     * @param tileType
-     * @return selected tile or null if none.
-     */
-    Tile getFocusedTile(Zone.TileType tileType) {
-        switch( tileType ) {
-            case BASE:
-                return focusedBaseTile;
-            case ITEM:
-                return focusedItemTile;
-        }
-        return null;
+//    /**
+//     * 
+//     * @param tileType
+//     * @return selected tile or null if none.
+//     */
+//    Tile getFocusedTile(Zone.TileType tileType) {
+//        switch( tileType ) {
+//            case BASE:
+//                return focusedBaseTile;
+//            case ITEM:
+//                return focusedItemTile;
+//        }
+//        return null;
+//    }
+    
+    public Tile getFocusedMapTile() {
+        return focusedBaseTile;
+    }
+    
+    public Tile getFocusedFixtureTile() {
+        return focusedItemTile;
     }
 
-    /**
-     * @param tileType
-     * @param focusedTile the focusedTile to set
-     */
-    public void setFocusedTile(Zone.TileType tileType, Tile focusedTile) {
-        switch ( tileType ) {
-            case BASE:
-                if ( focusedBaseTile != focusedTile ) {
-                    focusedBaseTile = focusedTile;
-                    notifyProjectChanged(this, ChangeType.FOCUS);
-                }
-            case ITEM:
-                if ( focusedItemTile != focusedTile ) {
-                    focusedItemTile = focusedTile;
-                    notifyProjectChanged(this, ChangeType.FOCUS);
-                }
+//    /**
+//     * @param tileType
+//     * @param focusedTile the focusedTile to set
+//     */
+//    public void setFocusedTile(Zone.TileType tileType, Tile focusedTile) {
+//        switch ( tileType ) {
+//            case BASE:
+//                if ( focusedBaseTile != focusedTile ) {
+//                    focusedBaseTile = focusedTile;
+//                    notifyProjectChanged(this, ChangeType.FOCUS);
+//                }
+//            case ITEM:
+//                if ( focusedItemTile != focusedTile ) {
+//                    focusedItemTile = focusedTile;
+//                    notifyProjectChanged(this, ChangeType.FOCUS);
+//                }
+//        }
+//    }
+    
+    public void setFocusedMapTile( Tile  t ) {
+        if ( focusedBaseTile != t ) {
+            focusedBaseTile = t;
+            notifyProjectChanged(this, ChangeType.FOCUS);
+        }        
+    }
+    
+    public void setFocusedFixtureTile( Tile t ) {
+        if ( focusedItemTile != t ) {
+            focusedItemTile = t;
+            notifyProjectChanged(this, ChangeType.FOCUS);
         }
     }
     
