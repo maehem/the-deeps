@@ -184,6 +184,21 @@ public class Zone {
         this.height = height;
     }
 
+    public boolean removeFixture( int x, int y ) {
+        FixtureTile t = getFixtureTile(x, y);
+        boolean result = false;
+        if ( t != null ) {
+            result = fixtures.remove((FixtureTile)t);
+            log.log(Level.INFO, 
+                    "Removed existing FixtureTile at: {0}{1}", 
+                    new Object[]{t.getX(), t.getY()}
+            );
+            notifyTileSwapped(t, null); 
+        }
+        
+        return result;
+    }
+    
     /**
      * Swap existing tile for a newer one. 
      * Removes any listeners of old tile.

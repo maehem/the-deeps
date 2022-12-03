@@ -142,10 +142,14 @@ public class ZoneView extends Group implements ZoneListener {
                             TileView tvOld = (TileView) node;
                             tvOld.getTile().removeListener(tvOld);
                         }
-                        log.log(Level.INFO, "Swapped Tile at: {0}x{1}", new Object[]{tNew.getX(), tNew.getY()});
-                        TileView tvNew = new TileView(tNew, zone);
-                        tvNew.setGrey(tv.isGrey()); // copy grey value from old tile
-                        getChildren().set(idx, tvNew);
+                        if ( tNew != null ) {
+                            log.log(Level.INFO, "Swapped Tile at: {0}x{1}", new Object[]{tNew.getX(), tNew.getY()});
+                            TileView tvNew = new TileView(tNew, zone);
+                            tvNew.setGrey(tv.isGrey()); // copy grey value from old tile
+                            getChildren().set(idx, tvNew);
+                        } else {
+                            getChildren().remove(idx);
+                        }
                         return;
                     }
                 }
