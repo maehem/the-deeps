@@ -24,6 +24,7 @@ import com.maehem.deeps.model.Tile;
 import com.maehem.deeps.model.TileListener;
 import com.maehem.deeps.model.Zone;
 import java.util.logging.Level;
+import javafx.geometry.Bounds;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Group;
 import javafx.scene.effect.BlurType;
@@ -108,7 +109,8 @@ public class TileView extends Group implements TileListener {
         }
                
         this.getChildren().addAll(new StackPane(new Group(view), greyOut));
-        this.setLayoutX(tile.getX() * dim);
+        Bounds bounds = view.getBoundsInParent(); // when a drop shadow, adjust position.
+        this.setLayoutX(tile.getX() * dim  - (bounds.getWidth()-dim)/2.0 );
         this.setLayoutY(tile.getY() * dim);
     }
 
