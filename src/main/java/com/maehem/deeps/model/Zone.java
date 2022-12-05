@@ -278,7 +278,7 @@ public class Zone {
         }
         
         while( line != null && line.startsWith("IDX")) {
-            log.log(Level.INFO, "    Found IDX {0}", line.substring(4));
+            log.log(Level.CONFIG, "    Found IDX {0}", line.substring(4));
             String[] idxArray = line.split(":");  //   IDX:A:<big number>
             sheetMap.put(idxArray[1].charAt(0), Long.valueOf(idxArray[2]));
             line = br.readLine();
@@ -306,7 +306,7 @@ public class Zone {
         // Rest of file is properties.
         Properties p = new Properties();
         p.load(br);
-        log.log(Level.INFO, "    Found {0} properties", p.size());
+        log.log(Level.FINE, "    Found {0} properties", p.size());
         
         return new Zone(gm, name, sheetMap, baseRows, p);        
     }

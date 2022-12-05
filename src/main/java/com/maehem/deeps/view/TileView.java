@@ -17,6 +17,7 @@
 package com.maehem.deeps.view;
 
 import static com.maehem.deeps.Deeps.log;
+import com.maehem.deeps.model.FixtureTile;
 import com.maehem.deeps.model.MapTile;
 import com.maehem.deeps.model.SheetModel;
 import com.maehem.deeps.model.Tile;
@@ -25,6 +26,8 @@ import com.maehem.deeps.model.Zone;
 import java.util.logging.Level;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Group;
+import javafx.scene.effect.BlurType;
+import javafx.scene.effect.DropShadow;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
@@ -35,65 +38,80 @@ import javafx.scene.shape.Rectangle;
  * @author Mark J Koch ( GitHub @maehem)
  */
 public class TileView extends Group implements TileListener {
+
+    private static final double FIXTURE_GREY_OPACITY = 0.2;
+
     private final int dim;  // logical tile dimension
     private final Tile tile;
     private final ImageView view;
     private final double dSc; // image tile dimension
     private final Zone zone;
     private final Rectangle greyOut;
-    
-    public TileView( Tile tm,  Zone zone ) {//, int x, int y ) {
+
+    public TileView(Tile tm, Zone zone) {
         this.zone = zone;
         this.tile = tm;
         SheetModel sm = zone.getSheet(tm.getSheet());
         this.dim = sm.getSize();
-        this.dSc = dim*sm.getFidelity();
+        this.dSc = dim * sm.getFidelity();
         this.view = new ImageView(sm.getImage());
-        this.greyOut = new Rectangle( dim, dim );
-        
-        initTile( sm ); //, x, y);
-        
+        this.greyOut = new Rectangle(dim, dim);
+
+        initTile(sm);
         updateTileVisible();
-        
         tm.addListener(this);
     }
-    
+
     /**
-     * TileView for Sheets in editors.  Does not listen to the tile.
-     * 
+     * TileView for Sheets in editors. Does not listen to the tile.
+     *
      * @param tm
-     * @param sm 
+     * @param sm
      */
-    public TileView( Tile tm, SheetModel sm ) { //, int x, int y ) {
+    public TileView(Tile tm, SheetModel sm) { //, int x, int y ) {
         this.zone = null;
         this.tile = tm;
         this.dim = sm.getSize();
-        this.dSc = dim*sm.getFidelity();
+        this.dSc = dim * sm.getFidelity();
         this.view = new ImageView(sm.getImage());
-        this.greyOut = new Rectangle( dim, dim );
-        
-        initTile( sm ); //, x, y);       
+        this.greyOut = new Rectangle(dim, dim);
+
+        initTile(sm); //, x, y);       
     }
-    
-    private void initTile(SheetModel sm  ) { //, int x, int y) {        
+
+    private void initTile(SheetModel sm) { //, int x, int y) {        
         // Normalize the scale relative to fidelity.
-        view.setScaleX(1.0/sm.getFidelity());
-        view.setScaleY(1.0/sm.getFidelity());
-        
-        int cx = tile.getIndex()%sm.getWidth();
-        int cy = tile.getIndex()/sm.getWidth();
-    
-        view.setViewport(new Rectangle2D( cx*dSc, cy*dSc, dSc, dSc ));
+        view.setScaleX(1.0 / sm.getFidelity());
+        view.setScaleY(1.0 / sm.getFidelity());
+
+        int cx = tile.getIndex() % sm.getWidth();
+        int cy = tile.getIndex() / sm.getWidth();
+
+        view.setViewport(new Rectangle2D(cx * dSc, cy * dSc, dSc, dSc));
 
         greyOut.setFill(Color.DARKGRAY);
         greyOut.setOpacity(0.5);
         greyOut.setVisible(false);
 
+        if ( getTile() instanceof FixtureTile  ) {
+            int umbra = ((FixtureTile)getTile()).getUmbra();
+            log.log(Level.FINER, "Tile is a FixtureTile:  umbra={0}", umbra);
+            if ( umbra > 0 ) {
+                DropShadow dropShadow = new DropShadow();
+                dropShadow.setBlurType(BlurType.GAUSSIAN);
+                dropShadow.setRadius(16.0);
+                dropShadow.setOffsetX(0.0);
+                dropShadow.setOffsetY(16.0);
+                dropShadow.setColor(Color.color(0.0, 0.0, 0.0, umbra/100.0 ));
+                view.setEffect(dropShadow);
+            }
+        }
+               
         this.getChildren().addAll(new StackPane(new Group(view), greyOut));
-        this.setLayoutX(tile.getX()*dim);
-        this.setLayoutY(tile.getY()*dim);   
+        this.setLayoutX(tile.getX() * dim);
+        this.setLayoutY(tile.getY() * dim);
     }
-    
+
     public final int getSize() {
         return dim;
     }
@@ -101,10 +119,10 @@ public class TileView extends Group implements TileListener {
     public Tile getTile() {
         return tile;
     }
-    
+
     @Override
     public void tileCodeChanged(Tile tile) {
-        log.log(Level.INFO, "Tile code changed. {0},{1}  {2}:{3}", 
+        log.log(Level.INFO, "Tile code changed. {0},{1}  {2}:{3}",
                 new Object[]{
                     tile.getX(), tile.getY(),
                     tile.getMnemonic(), tile.getDescription()
@@ -112,32 +130,30 @@ public class TileView extends Group implements TileListener {
         );
         // Sheet might have changed.  Need to get it.
         SheetModel sm = zone.getSheet(tile.getSheet());
-        int cx = tile.getIndex()%sm.getWidth();
-        int cy = tile.getIndex()/sm.getWidth();
+        int cx = tile.getIndex() % sm.getWidth();
+        int cy = tile.getIndex() / sm.getWidth();
         updateTileVisible();
         setGrey(false);
-        view.setViewport(new Rectangle2D( cx*dSc, cy*dSc, dSc, dSc ));
+        view.setViewport(new Rectangle2D(cx * dSc, cy * dSc, dSc, dSc));
     }
-    
+
     private void updateTileVisible() {
-        if ( !(tile instanceof MapTile ) ) {
-        //if ( !tile.isMapTile() ) {
+        if (!(tile instanceof MapTile)) {
             view.setVisible(tile.getIndex() > 0);
             greyOut.setVisible(tile.getIndex() > 0);
         }
     }
-    
-    public void setGrey( boolean b) {
-        if ( !(tile instanceof MapTile ) ) {
-        //if ( !tile.isMapTile() ) {
+
+    public void setGrey(boolean b) {
+        if (!(tile instanceof MapTile)) {
             this.greyOut.setVisible(false);
-            this.setOpacity(b?0.3:1.0);
+            this.setOpacity(b ? FIXTURE_GREY_OPACITY : 1.0);
         } else {
             this.greyOut.setVisible(b);
             this.setOpacity(1.0);
         }
     }
-    
+
     public boolean isGrey() {
         return greyOut.isVisible();
     }

@@ -73,7 +73,6 @@ public class EntityTile extends Tile {
     
     @Override
     protected void configureFlagSetting( String flag  ) {
-        super.configureFlagSetting(flag);
         
         Character f = flag.charAt(0);
         // Addtional flag considerations.

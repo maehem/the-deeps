@@ -73,7 +73,6 @@ public class EditorTilePropertiesPane extends VBox implements EditorProjectListe
 
         if (currentTile == null) {
             // Place no-selected label
-            //titleLabel.setText(tileType.name() + "  (No zone tile selected)");
             titleLabel.setText(tileClass.getSimpleName() + "  (No zone tile selected)");
             descriptionLabel.setText("");
 
@@ -99,6 +98,7 @@ public class EditorTilePropertiesPane extends VBox implements EditorProjectListe
                 widgets.getChildren().add(createIntWidget(FixtureTile.class, "storage"));
                 widgets.getChildren().add(createIntWidget(FixtureTile.class, "track"));
                 widgets.getChildren().add(createIntWidget(FixtureTile.class, "rolling"));
+                widgets.getChildren().add(createIntWidget(FixtureTile.class, "umbra"));
                 widgets.getChildren().add(createIntWidget(FixtureTile.class, "weapon"));
             } else if (newTile instanceof EntityTile) {
                 widgets.getChildren().add(createIntWidget(EntityTile.class, "enemy"));

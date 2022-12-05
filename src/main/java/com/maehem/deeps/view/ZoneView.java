@@ -37,34 +37,29 @@ public class ZoneView extends Group implements ZoneListener {
 
     public ZoneView(Zone zm) {
         this.zone = zm;
-
         log.log(Level.FINER, "Create ZoneView for : {0}", zm.getName());
 
-        //buildMap(TileType.BASE);
-        //buildMap(TileType.ITEM);
         buildMap();
         buildFixtures();
-
         zone.addListener(this);
     }
 
+    /**
+     * Build the map.
+     */
     private void buildMap(/* TileType type */) {
         log.log(Level.FINER, "  Build Map");
         for (int y = 0; y < zone.getHeight(); y++) {
             for (int x = 0; x < zone.getWidth(); x++) {
                 Tile tm = zone.getMapTile(x, y);
                 if (tm != null) {
-//                    if (type.equals(TileType.ITEM) && tm.getIndex() == 0) {
-//                        //tm.setMap(false);
-//                        continue;  // Don't place Item.index 0 tiles.
-//                    }
-
                     TileView t = new TileView(tm, zone); //, x, y);                
                     getChildren().add(t);
                 } else /*if (type == TileType.BASE)*/ {
                     log.log(Level.SEVERE,
                             "Zone: {0} MapTile {2}x{3} didn''t load!",
                             new Object[]{zone.getName(), x, y});
+                    // TODO: Maybe throw since all map cells should have an object.
                 }
             }
         }
@@ -74,22 +69,15 @@ public class ZoneView extends Group implements ZoneListener {
         log.log(Level.FINER, "  Build Fixtures" );
         for (int y = 0; y < zone.getHeight(); y++) {
             for (int x = 0; x < zone.getWidth(); x++) {
-                //Tile tm = zone.getTile(type, x, y);
                 Tile tm = zone.getFixtureTile(x, y);
                 if (tm != null) {
-                    if ( /*type.equals(TileType.ITEM) && */ tm.getIndex() == 0) {
-                        //tm.setMap(false);
-                        continue;  // Don't place Item.index 0 tiles.
+                    if ( tm.getIndex() == 0) {
+                        continue;  // Don't place Fixture.index 0 tiles.
                     }
 
                     TileView t = new TileView(tm, zone); //, x, y);                
                     getChildren().add(t);
                 } 
-//                else if (type == TileType.BASE) {
-//                    log.log(Level.SEVERE,
-//                            "Zone: {0} Type: {1}  Tile {2}x{3} didn''t load!",
-//                            new Object[]{zone.getName(), type.name(), x, y});
-//                } // else  TileType.ITEM tiles that are null, nothing to do.
             }
         }
     }
@@ -122,15 +110,16 @@ public class ZoneView extends Group implements ZoneListener {
     public void zoneTileSwapped(Tile tOld, Tile tNew) {
         if (tOld == null) { // Add new non-map tile.
             if (tOld instanceof MapTile) {
-                log.log(Level.SEVERE, "Tried to insert MapTile where there was previously no tile.\n    This should not be possible!");
+                log.log(Level.SEVERE, 
+                        "Tried to insert MapTile where there was previously no tile.\n" +
+                        "    This should not be possible!"
+                );
                 return;
             }
             log.log(Level.INFO, "New non-map Tile created at: {0}x{1}", new Object[]{tNew.getX(), tNew.getY()});
             TileView tvNew = new TileView(tNew, zone);
             tvNew.setGrey(false);
             getChildren().add(tvNew);
-
-            //return;
         } else {
             for (Node n : getChildrenUnmodifiable()) {
                 if (n instanceof TileView) {

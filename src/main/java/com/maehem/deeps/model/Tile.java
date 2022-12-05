@@ -72,7 +72,7 @@ public abstract class Tile implements Cloneable {
         this( zone, '_', index, x, y, props);
     }
         
-    protected final void applyFlags(String props) {
+    public final void applyFlags(String props) {
         if (props != null && props.length() > 0) {
             String[] flags = props.split(":");
             log.log(Level.FINER,
@@ -82,15 +82,17 @@ public abstract class Tile implements Cloneable {
 
             for (String flag : flags) {
                 log.log(Level.FINER, "    flag: {0}", flag);
-                //toggleMapFlag(flag.charAt(0));
+                configureLocalFlagSetting(flag);
                 configureFlagSetting(flag);
             }
         } else {
-            log.log(Level.INFO, "No props for {0}", getMnemonic());
+            log.log(Level.FINER, "No props for {0}", getMnemonic());
         }
     }
 
-    protected void configureFlagSetting( String flag  ) {
+    protected void configureFlagSetting( String flag  ) {}
+    
+    private void configureLocalFlagSetting( String flag) {
         Character f = flag.charAt(0);
         // Addtional flag considerations.
         switch( f ) {

@@ -36,6 +36,8 @@ public class FixtureTile extends Tile {
     public static final int ROLLING_DEFAULT    = -1;
     public static final int INVENTORY_DEFAULT  = -1;
     public static final int STORAGE_DEFAULT    = -1;
+    
+    public static final int UMBRA_MAX = 99;
 
     private int slowing = 0; // 0-99. Slows entity by % when walking here.
     private int harvestable = -1; // HP to harvest. -1=no. 0=free to pick. 1-99 Nailed down, hits needed.
@@ -51,10 +53,16 @@ public class FixtureTile extends Tile {
 
     public FixtureTile(Zone zone, Character sheet, int index, int x, int y, String props) {
         super(zone, sheet, index, x, y, props);
+        
+        // Apply props (local)
+        applyFlags(props);
     }
 
     public FixtureTile(Zone zone, int index, int x, int y, String props) {
         super(zone, index, x, y, props);
+        
+        // Apply props (local)
+        applyFlags(props);
     }
     
     public int getAblation() {
@@ -170,8 +178,8 @@ public class FixtureTile extends Tile {
     
     @Override
     public void configureFlagSetting( String flag ) {
-        super.configureFlagSetting(flag);
-        
+        log.log(Level.FINE, "Configure Fixture Tile Setting: {0}  {1}", 
+                new Object[]{getMnemonic(), flag });
         Character f = flag.charAt(0);
         // Addtional flag considerations.
         switch( f ) {
@@ -221,6 +229,9 @@ public class FixtureTile extends Tile {
                     String num = flag.substring(1);
                     setUmbra(Integer.parseInt(num));
                     log.log(Level.FINER, "    n = {0}", num);
+                } else {
+                    setUmbra(UMBRA_MAX);
+                    log.log(Level.FINER, "    n = umbra max");
                 }
                 break;
         }        

@@ -199,14 +199,6 @@ public class SheetModel {
         return fidelity;
     }
 
-//    public Character getIndex() {
-//        return index;
-//    }
-//
-//    public void setIndex(Character c) {
-//        this.index = c;
-//    }
-
     /**
      * Dimension of each tile, X or Y.
      *
