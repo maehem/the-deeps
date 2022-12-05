@@ -137,7 +137,8 @@ public class EditorTilePropertiesPane extends VBox implements EditorProjectListe
                         new Object[]{fieldName, t.getCharacter()});
                 try {
                     int parseInt = Integer.parseInt(tf.getText());
-                    field.setInt(currentTile, parseInt);
+                    field.set(currentTile, parseInt);
+                    currentTile.notifyPropertyChanged(fieldName);
                     project.setEdited(true);
                 } catch (NumberFormatException  ex) {
                     // Do not update value if not a number.

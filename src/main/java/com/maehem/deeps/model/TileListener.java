@@ -22,5 +22,6 @@ package com.maehem.deeps.model;
  */
 public interface TileListener {
     public void tileCodeChanged( Tile tile );
+    public void tilePropertyChanged( Tile tile, String propName );
     
 }

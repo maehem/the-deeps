@@ -48,6 +48,7 @@ public class TileView extends Group implements TileListener {
     private final double dSc; // image tile dimension
     private final Zone zone;
     private final Rectangle greyOut;
+    private DropShadow dropShadow = new DropShadow();
 
     public TileView(Tile tm, Zone zone) {
         this.zone = zone;
@@ -98,12 +99,11 @@ public class TileView extends Group implements TileListener {
             int umbra = ((FixtureTile)getTile()).getUmbra();
             log.log(Level.FINER, "Tile is a FixtureTile:  umbra={0}", umbra);
             if ( umbra > 0 ) {
-                DropShadow dropShadow = new DropShadow();
                 dropShadow.setBlurType(BlurType.GAUSSIAN);
                 dropShadow.setRadius(16.0);
                 dropShadow.setOffsetX(0.0);
                 dropShadow.setOffsetY(16.0);
-                dropShadow.setColor(Color.color(0.0, 0.0, 0.0, umbra/100.0 ));
+                setDropShadow(umbra);
                 view.setEffect(dropShadow);
             }
         }
@@ -114,6 +114,10 @@ public class TileView extends Group implements TileListener {
         this.setLayoutY(tile.getY() * dim);
     }
 
+    private void setDropShadow( int val ) {
+        dropShadow.setColor(Color.color(0.0, 0.0, 0.0, val/100.0 ));        
+    }
+    
     public final int getSize() {
         return dim;
     }
@@ -158,5 +162,16 @@ public class TileView extends Group implements TileListener {
 
     public boolean isGrey() {
         return greyOut.isVisible();
+    }
+
+    @Override
+    public void tilePropertyChanged(Tile tile, String propName) {
+        log.log(Level.INFO, "Tile Property changed: " + propName);
+        if ( propName.equals("umbra") ) {
+            if ( tile instanceof FixtureTile ) {
+                FixtureTile t = (FixtureTile) tile;
+                setDropShadow(t.getUmbra());
+            }
+        }
     }
 }

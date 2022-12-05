@@ -144,6 +144,7 @@ public class FixtureTile extends Tile {
     
     public void setUmbra( int umbra ) {
         this.umbra = umbra;
+        notifyPropertyChanged("umbra");
     }
     
     public int getWeapon() {

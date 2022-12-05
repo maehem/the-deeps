@@ -249,11 +249,20 @@ public abstract class Tile implements Cloneable {
         log.log(Level.FINE, "Tile.notifyMnemonicChanged: {0}x{1}  {2}",
                 new Object[]{ getX(), getY(), getMnemonic() });
         for (TileListener l : listeners) {
-            log.log(Level.FINER, "Tile.mnemonicListener: {0}", l.toString());
+            log.log(Level.FINER, "TileListener: {0}", l.toString());
             l.tileCodeChanged(this);
         }
     }
-
+    
+    public void notifyPropertyChanged( String propName ) {
+        log.log(Level.INFO, "Tile.notifyPropertyChanged: {0}x{1}  {2}",
+                new Object[]{ getX(), getY(), propName });
+        for (TileListener l : listeners) {
+            log.log(Level.FINER, "TileListener: {0}", l.toString());
+            l.tilePropertyChanged(this, propName);
+        }
+    }
+    
     public int getLuminous() {
         return luminous;
     }
