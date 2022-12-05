@@ -23,7 +23,6 @@ import java.util.logging.Level;
  * Tile that appears on Fixture Layer.
  * Things that decorate a map, items that can be picked up.
  * 
- * Might block or slow player.
  * 
  * @author mark
  */
@@ -33,7 +32,6 @@ public class FixtureTile extends Tile {
     public static final int UMBRA_DEFAULT      = -1;
     public static final int WEAPON_DEFAULT     = -1;
     public static final int ABLATION_DEFAULT   = -1; // -1 = can't wear, 0-99 wears down over time.
-    public static final int ROLLING_DEFAULT    = -1;
     public static final int INVENTORY_DEFAULT  = -1;
     public static final int STORAGE_DEFAULT    = -1;
     
@@ -45,7 +43,6 @@ public class FixtureTile extends Tile {
     
     private int ablation  = ABLATION_DEFAULT;       // -1 = cannont be worn/damaged. >= 0.  degrades over time. Max 99
     private int inventoryItem = INVENTORY_DEFAULT;  // -1 = not inventory. > 000-999 index in game
-    private int rolling   = ROLLING_DEFAULT;        // -1 = rail thing, moves on rails.
     private int storage   = STORAGE_DEFAULT;        // -1 = cannot store items. 0-999 = game index of storage item.
     private int track     = TRACK_DEFAULT;          // -1 = not track, track element, can move 'rolling' items.
     private int umbra     = UMBRA_DEFAULT;          // -1 = not casting shade, 0-99 cast drop shadow.
@@ -101,29 +98,6 @@ public class FixtureTile extends Tile {
         return inventoryItem >= 0;
     }
     
-    /**
-     * @return the rolling
-     */
-    public boolean isRolling() {
-        return rolling>=0;
-    }
-
-    /**
-     * Get value of 'rolling', game's version of direction and speed.
-     * 
-     * @return 
-     */
-    public int getRolling() {
-        return rolling;
-    }
-    
-    /**
-     * @param rolling the rolling to set
-     */
-    public void setRolling(int rolling) {
-        this.rolling = rolling;
-    }
-
     /**
      * @return the storage
      */
@@ -184,7 +158,7 @@ public class FixtureTile extends Tile {
         Character f = flag.charAt(0);
         // Addtional flag considerations.
         switch( f ) {
-            case 'A': // Ablation, WEAR  WEAR999 : E<idNumber>
+            case 'A': // Ablation, WEAR  WEAR999 : A<idNumber>
                 log.log(Level.FINER, "   Ablation:");
                 if (flag.length() > 1) {
                     String num = flag.substring(1);
@@ -248,9 +222,6 @@ public class FixtureTile extends Tile {
         }
         if ( getInventoryItem() != INVENTORY_DEFAULT ) {
             sb.append("I").append(getInventoryItem()).append(":");
-        }
-        if ( getRolling() != ROLLING_DEFAULT ) {
-            sb.append("R").append(getRolling()).append(":");
         }
         if ( getStorage() != STORAGE_DEFAULT ) {
             sb.append("S").append(getStorage()).append(":");

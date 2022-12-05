@@ -29,9 +29,11 @@ public class EntityTile extends Tile {
 
     public static final int NPC_DEFAULT        = -1;
     public static final int ENEMY_DEFAULT      = -1;
+    public static final int ROLLING_DEFAULT    = -1;
 
     private int npc       = NPC_DEFAULT;            // -1 = not a NPC.  0-999 = npc index from game.
     private int enemy     = ENEMY_DEFAULT;          // -1 = not enemy. 0-999 = enemy from game.     
+    private int rolling   = ROLLING_DEFAULT;        // -1 = rail thing, moves on rails.
 
     
     public EntityTile(Zone zone, Character sheet, int index, int x, int y, String props) {
@@ -70,6 +72,29 @@ public class EntityTile extends Tile {
         this.enemy = enemy;
     }
     
+    /**
+     * @return the rolling
+     */
+    public boolean isRolling() {
+        return rolling>=0;
+    }
+
+    /**
+     * Get value of 'rolling', game's version of direction and speed.
+     * 
+     * @return 
+     */
+    public int getRolling() {
+        return rolling;
+    }
+    
+    /**
+     * @param rolling the rolling to set
+     */
+    public void setRolling(int rolling) {
+        this.rolling = rolling;
+    }
+
     
     @Override
     protected void configureFlagSetting( String flag  ) {
@@ -107,6 +132,9 @@ public class EntityTile extends Tile {
         }
         if ( getNpc()!= NPC_DEFAULT ) {
             sb.append("C").append(getNpc()).append(":");
+        }
+        if ( getRolling() != ROLLING_DEFAULT ) {
+            sb.append("R").append(getRolling()).append(":");
         }
 
         sb.append("D").append(getDescription());
