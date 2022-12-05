@@ -52,7 +52,6 @@ public abstract class Tile implements Cloneable {
         this.zone = zone;
         this.sheet = sheet;
         this.index = index;
-        //this.mnemonic = mnemonic;
         this.x = x;
         this.y = y;
                    
@@ -82,14 +81,19 @@ public abstract class Tile implements Cloneable {
 
             for (String flag : flags) {
                 log.log(Level.FINER, "    flag: {0}", flag);
-                configureLocalFlagSetting(flag);
-                configureFlagSetting(flag);
+                configureLocalFlagSetting(flag);  // Configure parent class flags.
+                configureFlagSetting(flag); // Configure child class flags or overwrite parent flags/defaults.
             }
         } else {
             log.log(Level.FINER, "No props for {0}", getMnemonic());
         }
     }
 
+    /**
+     * Child class should override this method to set any additional properties.
+     * 
+     * @param flag to set
+     */
     protected void configureFlagSetting( String flag  ) {}
     
     private void configureLocalFlagSetting( String flag) {
