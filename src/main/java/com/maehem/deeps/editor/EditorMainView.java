@@ -16,6 +16,7 @@
  */
 package com.maehem.deeps.editor;
 
+import com.maehem.deeps.model.EntityTile;
 import com.maehem.deeps.model.FixtureTile;
 import com.maehem.deeps.model.MapTile;
 import java.io.IOException;
@@ -68,14 +69,19 @@ public class EditorMainView {
         // Right Pane
         EditorTilePropertiesPane tileProperties = new EditorTilePropertiesPane(MapTile.class);
         EditorTilePropertiesPane itemProperties = new EditorTilePropertiesPane(FixtureTile.class);
-        VBox rightBar = new VBox(tileProperties, itemProperties);
+        EditorTilePropertiesPane entityProperties = new EditorTilePropertiesPane(EntityTile.class);
+        VBox rightBar = new VBox(tileProperties, itemProperties, entityProperties );
         rightBar.setMaxWidth(WIDTH/5.0);
+        
         tileProperties.setFillWidth(true);
         tileProperties.setMinHeight(HEIGHT/5);
-        tileProperties.setMinWidth(WIDTH/5.0);
+        //tileProperties.setMinWidth(WIDTH/5.0);
         itemProperties.setFillWidth(true);
         itemProperties.setMinHeight(HEIGHT/5);
-        itemProperties.setMinWidth(WIDTH/5.0);
+        //itemProperties.setMinWidth(WIDTH/5.0);
+        entityProperties.setFillWidth(true);
+        entityProperties.setMinHeight(HEIGHT/5);
+        //entityProperties.setMinWidth(WIDTH/5.0);
         
         Node zoneTabs = new EditorZoneTabPane();
         
@@ -91,8 +97,6 @@ public class EditorMainView {
         stage.setScene(scene);
         stage.setMinWidth(WIDTH);
         stage.setMinHeight(HEIGHT);
-        
-        
         
     }
     

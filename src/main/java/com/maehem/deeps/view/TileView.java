@@ -17,6 +17,7 @@
 package com.maehem.deeps.view;
 
 import static com.maehem.deeps.Deeps.log;
+import com.maehem.deeps.model.EntityTile;
 import com.maehem.deeps.model.FixtureTile;
 import static com.maehem.deeps.model.FixtureTile.SHAD;
 import com.maehem.deeps.model.IntegerTileProperty;
@@ -110,11 +111,24 @@ public class TileView extends Group implements TileListener {
                 view.setEffect(dropShadow);
             }
         }
+        if ( getTile() instanceof EntityTile  ) {
+            int umbra = ((EntityTile)getTile()).getUmbra();
+            log.log(Level.FINER, "Tile is a EntityTile:  SHAD={0}", umbra);
+            if ( umbra > 0 ) {
+                dropShadow.setBlurType(BlurType.GAUSSIAN);
+                dropShadow.setRadius(10.0);
+                dropShadow.setOffsetX(2.0);
+                dropShadow.setOffsetY(-10.0);
+                setDropShadow(umbra);
+                view.setEffect(dropShadow);
+                this.setTranslateY(-3.0);
+            }
+        }
                
         this.getChildren().addAll(new StackPane(new Group(view), greyOut));
         Bounds bounds = view.getBoundsInParent(); // when a drop shadow, adjust position.
         this.setLayoutX(tile.getX() * dim  - (bounds.getWidth()-dim)/2.0 );
-        this.setLayoutY(tile.getY() * dim);
+        this.setLayoutY(tile.getY() * dim - (bounds.getHeight()-dim)/2.0 );
     }
 
     private void setDropShadow( int val ) {
@@ -182,9 +196,19 @@ public class TileView extends Group implements TileListener {
     public void tilePropertyChanged(TileProperty property) {
         log.log(Level.FINER, "TileView: Tile Property changed: {0}", property.getFlag());
         if ( property.getParent() instanceof FixtureTile ) {
-            FixtureTile t = (FixtureTile) property.getParent();
+            //FixtureTile t = (FixtureTile) property.getParent();
             switch (property.getFlag() ) {
-                case SHAD:
+                case FixtureTile.SHAD:
+                    if ( property instanceof IntegerTileProperty ) {
+                        setDropShadow(((IntegerTileProperty) property).getValue());
+                    }
+                    break;
+            }
+        }
+        if ( property.getParent() instanceof EntityTile ) {
+            //EntityTile t = (EntityTile) property.getParent();
+            switch (property.getFlag() ) {
+                case EntityTile.SHAD:
                     if ( property instanceof IntegerTileProperty ) {
                         setDropShadow(((IntegerTileProperty) property).getValue());
                     }

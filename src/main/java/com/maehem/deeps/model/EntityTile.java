@@ -17,6 +17,7 @@
 package com.maehem.deeps.model;
 
 import static com.maehem.deeps.Deeps.log;
+import static com.maehem.deeps.model.IntegerTileProperty.EditStyle.SLIDER;
 import java.util.logging.Level;
 
 /**
@@ -26,6 +27,12 @@ import java.util.logging.Level;
  * @author mark
  */
 public class EntityTile extends Tile {
+
+    public static final String SHAD = "SHAD";
+
+    public static final int SHAD_DEFAULT    = -1;
+    public static final int SHAD_MIN        = -1;
+    public static final int SHAD_MAX        = 99;
 
     public static final int NPC_DEFAULT        = -1;
     public static final int ENEMY_DEFAULT      = -1;
@@ -38,12 +45,31 @@ public class EntityTile extends Tile {
     
     public EntityTile(Zone zone, Character sheet, int index, int x, int y, String props) {
         super(zone, sheet, index, x, y );//, props);
+        initProperties();
         applyFlags(props);
     }
 
     public EntityTile(Zone zone, int index, int x, int y, String props) {
         super(zone, index, x, y );//, props);
+        initProperties();
         applyFlags(props);
+    }
+    
+    private void initProperties() {
+        getProperties().add(new IntegerTileProperty(
+                this, SHAD, "Drop Shadow", 
+                SHAD_MIN, SHAD_MAX, SHAD_DEFAULT, SLIDER));
+        
+    }
+    
+    public int getUmbra() {
+        return ((IntegerTileProperty)getProperty(SHAD)).getValue();
+    }
+    
+    public void setUmbra( int val ) {
+        IntegerTileProperty prop = (IntegerTileProperty)getProperty(SHAD);
+        prop.setValue(val);
+        notifyPropertyChanged(prop);
     }
     
     /**
@@ -120,6 +146,17 @@ public class EntityTile extends Tile {
                     log.log(Level.FINER, "    n = {0}", num);
                 }
                 break;
+            case 'U': // Cast shadow,  SHAD99 :  U<int>
+                log.log(Level.FINER, "   Umbra:");
+                if (flag.length() > 1) {
+                    String num = flag.substring(1);
+                    setUmbra(Integer.parseInt(num));
+                    log.log(Level.FINER, "    n = {0}", num);
+                } else {
+                    setUmbra(SHAD_MAX);
+                    log.log(Level.FINER, "    n = umbra max");
+                }
+                break;
         }        
     }
     
@@ -137,6 +174,9 @@ public class EntityTile extends Tile {
         }
         if ( getRolling() != ROLLING_DEFAULT ) {
             sb.append("R").append(getRolling()).append(":");
+        }
+        if ( getUmbra() != SHAD_DEFAULT ) {
+            sb.append("U").append(getUmbra()).append(":");
         }
 
         sb.append("D").append(getDescription());

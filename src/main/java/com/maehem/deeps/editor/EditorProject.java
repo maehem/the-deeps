@@ -67,6 +67,7 @@ public final class EditorProject implements GameModel {
     private Tile currentSheetTile = null; // Tile that is highlighted in visible SheetViewTabPane
     private Tile focusedBaseTile = null; // Tile that is highlighted in visible Zone editor tab
     private Tile focusedItemTile = null; // Tile that is highlighted in visible Zone editor tab
+    private Tile focusedEntityTile = null; // Tile that is highlighted in visible Zone editor tab
 
     private EditorProject() {
         File appDataDir = getAppDataDir();
@@ -469,6 +470,10 @@ public final class EditorProject implements GameModel {
         return focusedItemTile;
     }
 
+    public Tile getFocusedEntityTile() {
+        return focusedEntityTile;
+    }
+
 //    /**
 //     * @param tileType
 //     * @param focusedTile the focusedTile to set
@@ -498,6 +503,13 @@ public final class EditorProject implements GameModel {
     public void setFocusedFixtureTile( Tile t ) {
         if ( focusedItemTile != t ) {
             focusedItemTile = t;
+            notifyProjectChanged(this, ChangeType.FOCUS);
+        }
+    }
+    
+    public void setFocusedEntityTile( Tile t ) {
+        if ( focusedEntityTile != t ) {
+            focusedEntityTile = t;
             notifyProjectChanged(this, ChangeType.FOCUS);
         }
     }
