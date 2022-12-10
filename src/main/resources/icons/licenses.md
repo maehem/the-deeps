@@ -14,3 +14,4 @@ Play          icon by Arthur Shlain from Usefulicons  https://usefulicons.com/gl
 Command Line  icon by Arthur Shlain from Usefulicons  https://usefulicons.com/glyph-icons-16x16/command-line
 Cogwheel      icon by Arthur Shlain from Usefulicons  https://usefulicons.com/glyph-icons-16x16/cogwheel
 Poison Bottle icon by Arthur Shlain from Usefulicons  https://usefulicons.com/glyph-icons-16x16/poison-bottle
+Spider        icon by Arthur Shlain from Usefulicons  https://usefulicons.com/glyph-icons-16x16/spider

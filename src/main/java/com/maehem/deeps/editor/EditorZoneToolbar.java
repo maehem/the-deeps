@@ -47,6 +47,7 @@ public class EditorZoneToolbar extends ToolBar{
     private final ToggleButton selectButton;
     private final ToggleButton stampBaseButton;
     private final ToggleButton stampItemButton;
+    private final ToggleButton stampEntityButton;
 
     private final Pane leftSpacer = new Pane();
 
@@ -58,14 +59,18 @@ public class EditorZoneToolbar extends ToolBar{
         zoomReset = createButton("Zoom Reset", "/icons/magnifier.png");
         selectButton = createToggleButton("Select", "/icons/plus-circle.png");
         stampBaseButton = createToggleButton("Stamp Map Base", "/icons/paw-print.png");
-        stampItemButton = createToggleButton("Stamp Item", "/icons/poison-bottle.png");
+        stampItemButton = createToggleButton("Stamp Fixture", "/icons/poison-bottle.png");
+        stampEntityButton = createToggleButton("Stamp Entity", "/icons/spider.png");
 
         ToggleGroup functionGroup = new ToggleGroup();
         selectButton.setToggleGroup(functionGroup);
         stampBaseButton.setToggleGroup(functionGroup);
         stampItemButton.setToggleGroup(functionGroup);
+        stampEntityButton.setToggleGroup(functionGroup);
         
-        HBox functionButtons = new HBox(selectButton, stampBaseButton, stampItemButton);
+        HBox functionButtons = new HBox(selectButton, 
+                stampBaseButton, stampItemButton, stampEntityButton
+        );
         
         getItems().addAll(
                 zoomOut,
@@ -106,7 +111,11 @@ public class EditorZoneToolbar extends ToolBar{
         });
         stampItemButton.setOnAction((t) -> {
             editor.setFunction(EditorZoneEditor.Function.STAMP_FIXTURE);
-            log.log(Level.INFO, "Toggle Stamp Item Button");
+            log.log(Level.INFO, "Toggle Stamp Fixture Button");
+        });
+        stampEntityButton.setOnAction((t) -> {
+            editor.setFunction(EditorZoneEditor.Function.STAMP_ENTITY);
+            log.log(Level.INFO, "Toggle Stamp Entity Button");
         });
         
         

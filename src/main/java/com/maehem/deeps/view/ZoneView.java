@@ -48,7 +48,7 @@ public class ZoneView extends Group implements ZoneListener {
     /**
      * Build the map.
      */
-    private void buildMap(/* TileType type */) {
+    private void buildMap() {
         log.log(Level.FINER, "  Build Map");
         for (int y = 0; y < zone.getHeight(); y++) {
             for (int x = 0; x < zone.getWidth(); x++) {
@@ -56,7 +56,7 @@ public class ZoneView extends Group implements ZoneListener {
                 if (tm != null) {
                     TileView t = new TileView(tm, zone); //, x, y);                
                     getChildren().add(t);
-                } else /*if (type == TileType.BASE)*/ {
+                } else {
                     log.log(Level.SEVERE,
                             "Zone: {0} MapTile {2}x{3} didn''t load!",
                             new Object[]{zone.getName(), x, y});

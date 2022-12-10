@@ -17,6 +17,7 @@
 package com.maehem.deeps.editor;
 
 import static com.maehem.deeps.Deeps.log;
+import com.maehem.deeps.model.EntityTile;
 import com.maehem.deeps.model.FixtureTile;
 import com.maehem.deeps.model.MapTile;
 import com.maehem.deeps.model.SheetModel;
@@ -46,7 +47,7 @@ import javafx.scene.transform.Scale;
 public class EditorZoneEditor extends ScrollPane implements EditorProjectListener {
 
     public static enum Function {
-        SELECT, STAMP_MAP, STAMP_FIXTURE
+        SELECT, STAMP_MAP, STAMP_FIXTURE, STAMP_ENTITY
     }
 
     private final Zone zone;
@@ -123,6 +124,9 @@ public class EditorZoneEditor extends ScrollPane implements EditorProjectListene
                     break;
                 case STAMP_FIXTURE:
                     doStampBase(t, FixtureTile.class);
+                    break;
+                case STAMP_ENTITY:
+                    doStampBase(t, EntityTile.class);
                     break;
                 default:
 
@@ -201,10 +205,16 @@ public class EditorZoneEditor extends ScrollPane implements EditorProjectListene
                     }
                     break;
 
-
                 case STAMP_FIXTURE:
                     // remove fixture at x,y
                     if ( zone.removeFixture(x,y) ) {
+                        project.setEdited(true);
+                    }
+                    break;
+                    
+                case STAMP_ENTITY:
+                    // remove entity at x,y
+                    if ( zone.removeEntity(x,y) ) {
                         project.setEdited(true);
                     }
                     break;
@@ -246,7 +256,10 @@ public class EditorZoneEditor extends ScrollPane implements EditorProjectListene
                         tv.setGrey(!(tv.getTile() instanceof MapTile));
                         break;
                     case STAMP_FIXTURE:
-                        tv.setGrey(tv.getTile() instanceof MapTile);
+                        tv.setGrey(!(tv.getTile() instanceof FixtureTile));
+                        break;
+                    case STAMP_ENTITY:
+                        tv.setGrey(!(tv.getTile() instanceof EntityTile));
                         break;
                 }
             }
@@ -260,6 +273,7 @@ public class EditorZoneEditor extends ScrollPane implements EditorProjectListene
                 break;
             case STAMP_MAP:
             case STAMP_FIXTURE:
+            case STAMP_ENTITY:
                 setCursorStamp();
                 break;
         }
@@ -281,8 +295,8 @@ public class EditorZoneEditor extends ScrollPane implements EditorProjectListene
             t.setOpacity(0.7);
             SnapshotParameters sp = new SnapshotParameters();
 
-            log.log(Level.INFO, " Tile size: " + t.getSize() + "  scale: " + t.getScaleX());
-            log.log(Level.INFO, " ScaleGroup.scale: " + scaleGroup.getScaleX());
+            log.log(Level.INFO, " Tile size: {0}  scale: {1}", new Object[]{t.getSize(), t.getScaleX()});
+            log.log(Level.INFO, " ScaleGroup.scale: {0}", scaleGroup.getScaleX());
             // Scale image to match zoom level.
             sp.setTransform(new Scale(scaleGroup.getScaleX(), scaleGroup.getScaleY()));
             // change opacity of image. Will be white background otherwise

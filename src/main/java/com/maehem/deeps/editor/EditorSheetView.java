@@ -16,6 +16,9 @@
  */
 package com.maehem.deeps.editor;
 
+import static com.maehem.deeps.editor.EditorZoneEditor.Function.STAMP_FIXTURE;
+import com.maehem.deeps.model.EntityTile;
+import com.maehem.deeps.model.FixtureTile;
 import com.maehem.deeps.model.MapTile;
 import com.maehem.deeps.model.SheetModel;
 import com.maehem.deeps.model.Tile;
@@ -46,13 +49,11 @@ public class EditorSheetView extends VBox implements EditorProjectListener {
     public static final Logger log = Logger.getLogger("deeps");
 
     private double zoom = 1.5;
-    //private double imgScale;
     private final ImageView imgView;
     private final SheetModel sheet;
     private final StackPane imgViewGroup;
     private final ScrollPane sp;
     private final Rectangle selectedRect;
-    //private final ArrayList<Rectangle> tileGrey = new ArrayList<>();
     private final Group rectG;
     private final Rectangle area;
     private final Group scalableImageView;
@@ -86,7 +87,6 @@ public class EditorSheetView extends VBox implements EditorProjectListener {
         imgView.setScaleX(1.0/sheet.getFidelity());
         imgView.setScaleY(1.0/sheet.getFidelity());
         scalableImageView = new Group(imgView);
-        //Group imgGroup = new Group(scalableImageView);
         
         this.selectedRect = new Rectangle( tSize, tSize );
         this.selectedRect.setVisible(false);
@@ -218,7 +218,10 @@ public class EditorSheetView extends VBox implements EditorProjectListener {
                             tv.setGrey(!(tv.getTile() instanceof MapTile));
                             break;
                         case STAMP_FIXTURE:
-                            tv.setGrey(tv.getTile() instanceof MapTile);
+                            tv.setGrey(!(tv.getTile() instanceof FixtureTile));
+                            break;
+                        case STAMP_ENTITY:
+                            tv.setGrey(!(tv.getTile() instanceof EntityTile));
                             break;
                     }
                 } else {
