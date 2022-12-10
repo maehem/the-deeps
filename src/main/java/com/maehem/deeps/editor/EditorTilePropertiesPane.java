@@ -143,21 +143,21 @@ public class EditorTilePropertiesPane extends VBox implements EditorProjectListe
             //widgets.getChildren().add(createIntWidget(Tile.class, "sound"));
             //widgets.getChildren().add(createIntWidget(Tile.class, "luminous"));
 
-            if (newTile instanceof MapTile) {
-
-            } else if (newTile instanceof FixtureTile) {
-                //widgets.getChildren().add(createIntWidget(FixtureTile.class, "ablation"));
-                //widgets.getChildren().add(createIntWidget(FixtureTile.class, "inventoryItem"));
-                //widgets.getChildren().add(createIntWidget(FixtureTile.class, "storage"));
-                //widgets.getChildren().add(createIntWidget(FixtureTile.class, "track"));
-                //widgets.getChildren().add(createIntWidget(FixtureTile.class, "umbra"));
-                //widgets.getChildren().add(createIntWidget(FixtureTile.class, "weapon"));
-            } else if (newTile instanceof EntityTile) {
-                widgets.getChildren().add(createIntWidget(EntityTile.class, "enemy"));
-                widgets.getChildren().add(createIntWidget(EntityTile.class, "npc"));
-                widgets.getChildren().add(createIntWidget(FixtureTile.class, "rolling"));
-
-            }
+//            if (newTile instanceof MapTile) {
+//
+//            } else if (newTile instanceof FixtureTile) {
+//                //widgets.getChildren().add(createIntWidget(FixtureTile.class, "ablation"));
+//                //widgets.getChildren().add(createIntWidget(FixtureTile.class, "inventoryItem"));
+//                //widgets.getChildren().add(createIntWidget(FixtureTile.class, "storage"));
+//                //widgets.getChildren().add(createIntWidget(FixtureTile.class, "track"));
+//                //widgets.getChildren().add(createIntWidget(FixtureTile.class, "umbra"));
+//                //widgets.getChildren().add(createIntWidget(FixtureTile.class, "weapon"));
+//            } else if (newTile instanceof EntityTile) {
+//                widgets.getChildren().add(createIntWidget(EntityTile.class, "enemy"));
+//                widgets.getChildren().add(createIntWidget(EntityTile.class, "npc"));
+//                widgets.getChildren().add(createIntWidget(FixtureTile.class, "rolling"));
+//
+//            }
 
             for (TileProperty tp : currentTile.getPropertiesUnmodifiable()) {
                 widgets.getChildren().add(createWidget(tp));
@@ -298,6 +298,8 @@ public class EditorTilePropertiesPane extends VBox implements EditorProjectListe
                 ct = p.getFocusedMapTile();
             } else if (tileClass == FixtureTile.class) {
                 ct = p.getFocusedFixtureTile();
+            } else if (tileClass == EntityTile.class) {
+                ct = p.getFocusedEntityTile();
             }
             if ( /*ct != null && */ ct != currentTile) {
                 log.log(Level.FINE, "Focus changed for properties tab.");

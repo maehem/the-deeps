@@ -152,6 +152,7 @@ public class EditorZoneEditor extends ScrollPane implements EditorProjectListene
         zoneView.setFocusY(y);
         project.setFocusedMapTile(zone.getMapTile(x, y));
         project.setFocusedFixtureTile(zone.getFixtureTile(x, y));
+        project.setFocusedEntityTile(zone.getEntityTile(x, y));
     }
 
     private void doStampBase(MouseEvent mevt, Class clazz) {
@@ -282,7 +283,6 @@ public class EditorZoneEditor extends ScrollPane implements EditorProjectListene
     private void setCursorStamp() {
         try {
             Character key = zone.getKeyFor(project.getCurrentTileUID());
-            //String currentTile = key + String.valueOf( project.getCurrentTileNum());
 
             Tile clone = (Tile) project.getCurrentSheetTile().clone();
             clone.setSheet(key);
@@ -290,7 +290,6 @@ public class EditorZoneEditor extends ScrollPane implements EditorProjectListene
                 key + clone.getMnemonic().substring(1)
             });
             // Get image for current selected tile.
-            //Tile tm = new Tile(currentTile, null);
             TileView t = new TileView(clone, zone.getSheet(key)); //, 0, 0);
             t.setOpacity(0.7);
             SnapshotParameters sp = new SnapshotParameters();
