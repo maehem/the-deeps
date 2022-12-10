@@ -30,7 +30,7 @@ public class EntityTile extends Tile {
 
     public static final String SHAD = "SHAD";
 
-    public static final int SHAD_DEFAULT    = -1;
+    public static final int SHAD_DEFAULT    = 30;
     public static final int SHAD_MIN        = -1;
     public static final int SHAD_MAX        = 99;
 
@@ -162,10 +162,9 @@ public class EntityTile extends Tile {
     
     @Override
     public String getFlags() {
-        super.getFlags();
-        
-        StringBuilder sb = new StringBuilder();
-        
+        StringBuilder sb = new StringBuilder(super.getFlags());
+        sb.append(":");
+                
         if ( getEnemy() != ENEMY_DEFAULT ) {
             sb.append("E").append(getEnemy()).append(":");
         }
@@ -178,8 +177,6 @@ public class EntityTile extends Tile {
         if ( getUmbra() != SHAD_DEFAULT ) {
             sb.append("U").append(getUmbra()).append(":");
         }
-
-        sb.append("D").append(getDescription());
         
         return sb.toString();
     }

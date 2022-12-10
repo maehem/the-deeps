@@ -128,7 +128,7 @@ public class TileView extends Group implements TileListener {
         this.getChildren().addAll(new StackPane(new Group(view), greyOut));
         Bounds bounds = view.getBoundsInParent(); // when a drop shadow, adjust position.
         this.setLayoutX(tile.getX() * dim  - (bounds.getWidth()-dim)/2.0 );
-        this.setLayoutY(tile.getY() * dim - (bounds.getHeight()-dim)/2.0 );
+        this.setLayoutY(tile.getY() * dim  - (bounds.getHeight()-dim)/2.0 );
     }
 
     private void setDropShadow( int val ) {
