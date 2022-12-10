@@ -17,7 +17,10 @@
 package com.maehem.deeps.model;
 
 import static com.maehem.deeps.Deeps.log;
+import static com.maehem.deeps.model.IntegerTileProperty.EditStyle.*;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.logging.Level;
 
 /**
@@ -29,6 +32,8 @@ public abstract class Tile implements Cloneable {
 
     private ArrayList<TileListener> listeners = new ArrayList<>();
     
+    private ArrayList<TileProperty> properties = new ArrayList<>();
+    
     private Zone zone;
     private Character sheet;
     private final int index;
@@ -37,40 +42,69 @@ public abstract class Tile implements Cloneable {
     
     private String description = ""; // String description
     
-    public static final int BLOCKING_DEFAULT   = -1;
-    public static final int BLOCKING_MAX = 99;
+    public static final String BLOK = "BLOK";
+    public static final String LUMI = "LUMI";
+    public static final String NOIZ = "NOIZ";
 
-    public static final int LUMINOUS_DEFAULT   = -1;
-    public static final int SOUND_DEFAULT      = -1;
+    public static final String BLOK_LBL = "Blocking";
+    public static final String LUMI_LBL = "Luminance";
+    public static final String NOIZ_LBL = "Sound Effect";
+
+    public static final int BLOCKING_DEFAULT    = -1;
+    public static final int BLOCKING_MIN        = BLOCKING_DEFAULT;
+    public static final int BLOCKING_MAX        = 99;
+
+    public static final int LUMINOUS_DEFAULT    = -1;
+    public static final int LUMINOUS_MIN        = LUMINOUS_DEFAULT;
+    public static final int LUMINOUS_MAX        = 99;
+
+    public static final int NOIZ_DEFAULT        = -1;
+    public static final int NOIZ_MIN            = NOIZ_DEFAULT;
+    public static final int NOIZ_MAX            = 99;
 
     private int blocking  = BLOCKING_DEFAULT;       // -1 = not blocking,  0-99  blocks/slows by this amount (99 is default)
     private int luminous  = LUMINOUS_DEFAULT;       // -1 = no light emmited.  00-99, light effect # in game engine.
-    private int sound     = SOUND_DEFAULT;          // -1 = no sound emitted. 0-999 = sound index from a game table.
+    private int sound     = NOIZ_DEFAULT;          // -1 = no sound emitted. 0-999 = sound index from a game table.
 
-    
-    public Tile(Zone zone, Character sheet, int index, int x, int y, String props) {
+    /**
+     * Abstract Tile.   Extend the class.  Call super() and then applyFlags().
+     * 
+     * @param zone
+     * @param sheet
+     * @param index
+     * @param x
+     * @param y 
+     */
+    public Tile(Zone zone, Character sheet, int index, int x, int y /*, String props */) {
         this.zone = zone;
         this.sheet = sheet;
         this.index = index;
         this.x = x;
         this.y = y;
-                   
-        applyFlags(props);  // colon :  separated list. 
+        log.log(Level.INFO, "Create new Tile({0},{1},{2},{3},{4})", 
+                new Object[]{zone==null?"null":zone.getName(), sheet, index, x, y}
+        );
+        
+        // TODO: Define Strings above.
+        properties.add(new IntegerTileProperty(this, "BLOK", "Block", -1, 99, BLOCKING_DEFAULT, SLIDER));
+        properties.add(new IntegerTileProperty(this, "NOIZ", "Sound Effect", -1, 999, NOIZ_DEFAULT, TEXT_FIELD));
+        properties.add(new IntegerTileProperty(this, "LUMI", "Light Emmision", -1, 99, LUMINOUS_DEFAULT, SPINNER));
+        
+        //applyFlags(props);  // colon :  separated list.
     }
     
     /**
-     * Blank Tile.
+     * Abstract Blank Tile.  Extend the class and call super().  Call applyFlags() in subclass.
      * 
      * @param zone
      * @param index
      * @param x
      * @param y
-     * @param props 
      */
-    public Tile(Zone zone, int index, int x, int y, String props) {
-        this( zone, '_', index, x, y, props);
+    public Tile(Zone zone, int index, int x, int y /*, String props */) {
+        this( zone, '_', index, x, y ); //, props);
     }
-        
+    
     public final void applyFlags(String props) {
         if (props != null && props.length() > 0) {
             String[] flags = props.split(":");
@@ -228,8 +262,12 @@ public abstract class Tile implements Cloneable {
      }
      
     public final void addListener(TileListener l) {
-        log.log(Level.FINE, "Tile: Add Tile Listener: {0}x{1}  obj:{2}", 
-                new Object[]{ getX(), getY(), l.toString() });
+        String zoneName = "null";
+        if ( zone != null ) {
+            zoneName = zone.getName();
+        }
+        log.log(Level.FINE, "Tile: Zone: {0} Add Tile Listener: {1}x{2}  obj: {3}   list:{4}", 
+                new Object[]{ zoneName, getX(), getY(), this.toString(), l.toString() });
         listeners.add(l);
     }
 
@@ -246,6 +284,7 @@ public abstract class Tile implements Cloneable {
      * 
      */
     public void retire() {
+        log.log(Level.INFO, "Clear listeners:  obj: {0}x{1}", new Object[]{getX(), getY()});
         listeners.clear();
     }
     
@@ -259,12 +298,24 @@ public abstract class Tile implements Cloneable {
     }
     
     public void notifyPropertyChanged( String propName ) {
-        log.log(Level.INFO, "Tile.notifyPropertyChanged: {0}x{1}  {2}",
+        log.log(Level.INFO, "(old) Tile.notifyPropertyChanged: {0}x{1}  {2}",
                 new Object[]{ getX(), getY(), propName });
         for (TileListener l : listeners) {
             log.log(Level.FINER, "TileListener: {0}", l.toString());
             l.tilePropertyChanged(this, propName);
         }
+    }
+    
+    public void notifyPropertyChanged( TileProperty property ) {
+        log.log(Level.FINE, "Tile.notifyPropertyChanged: {0}x{1}  {2}  obj: {3}",
+                new Object[]{ getX(), getY(), property.getFlag(), this });
+        if ( listeners.isEmpty() ) {
+            log.log(Level.FINER, "   no one is listening!");
+        }
+        for (TileListener l : listeners) {
+            log.log(Level.FINER, "TileListener: {0}", l.toString());
+            l.tilePropertyChanged(property);
+        }        
     }
     
     public int getLuminous() {
@@ -276,15 +327,19 @@ public abstract class Tile implements Cloneable {
     }
     
     public int getBlocking() {
-        return blocking;
+        return ((IntegerTileProperty)getProperty(BLOK)).getValue();
+        //return blocking;
     }
     
     public void setBlocking( int val) {
-        this.blocking = val;
+        //this.blocking = val;
+        IntegerTileProperty prop = (IntegerTileProperty)getProperty(BLOK);
+        prop.setValue(val);
+        notifyPropertyChanged(prop);
     }
     
     public boolean isBlocking() {
-        return blocking>=0;
+        return getBlocking()>=0;
     }
     
     /**
@@ -315,7 +370,7 @@ public abstract class Tile implements Cloneable {
         if ( getLuminous()!= LUMINOUS_DEFAULT ) {
             sb.append("L").append(getLuminous()).append(":");
         }
-        if ( getSound() != SOUND_DEFAULT ) {
+        if ( getSound() != NOIZ_DEFAULT ) {
             sb.append("F").append(getSound()).append(":");
         }
 
@@ -327,13 +382,42 @@ public abstract class Tile implements Cloneable {
     @Override
     public Object clone() throws CloneNotSupportedException {
         Tile t = (Tile) super.clone();
-        log.log(Level.FINER, "Cloned tile {0} -> {1}",
+        log.log(Level.FINE, "Cloned tile {0} -> {1}",
                 new Object[]{this, t}
         );
         t.listeners = new ArrayList<>();
+        t.x = 0;
+        t.y = 0;
+        
+        ArrayList<TileProperty> newProps = new ArrayList<>();
+        for ( TileProperty tp: this.getPropertiesUnmodifiable() ) {
+            TileProperty newTp = (TileProperty) tp.clone();
+            newTp.setParent(t);
+            newProps.add(newTp);
+        }
+        t.properties = newProps;
         t.zone = null;
         t.sheet = '_';
         return t; 
     }
      
+    public ArrayList<TileProperty> getProperties() {
+        return properties;
+    }
+    
+    public List<TileProperty> getPropertiesUnmodifiable() {
+        return Collections.unmodifiableList(properties);
+    }
+    
+    public TileProperty getProperty( String flag ) {
+        for ( TileProperty tp: getPropertiesUnmodifiable()) {
+            log.log(Level.FINER, "    get:{0}   found:{1}", new Object[]{flag, tp.getFlag()});
+            if ( tp.getFlag().equals(flag) ) {
+                log.log(Level.FINER, "    ^-- match!");
+                return tp;
+            }
+        }
+        return null;
+    }
+    
 }

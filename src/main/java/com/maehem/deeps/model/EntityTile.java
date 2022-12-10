@@ -37,11 +37,13 @@ public class EntityTile extends Tile {
 
     
     public EntityTile(Zone zone, Character sheet, int index, int x, int y, String props) {
-        super(zone, sheet, index, x, y, props);
+        super(zone, sheet, index, x, y );//, props);
+        applyFlags(props);
     }
 
     public EntityTile(Zone zone, int index, int x, int y, String props) {
-        super(zone, index, x, y, props);
+        super(zone, index, x, y );//, props);
+        applyFlags(props);
     }
     
     /**

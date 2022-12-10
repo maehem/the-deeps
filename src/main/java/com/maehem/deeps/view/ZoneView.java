@@ -41,6 +41,7 @@ public class ZoneView extends Group implements ZoneListener {
 
         buildMap();
         buildFixtures();
+        buildEntities();
         zone.addListener(this);
     }
 
@@ -66,13 +67,30 @@ public class ZoneView extends Group implements ZoneListener {
     }
     
     private void buildFixtures() {
-        log.log(Level.FINER, "  Build Fixtures" );
+        log.log(Level.INFO, "  Build Fixtures" );
         for (int y = 0; y < zone.getHeight(); y++) {
             for (int x = 0; x < zone.getWidth(); x++) {
                 Tile tm = zone.getFixtureTile(x, y);
                 if (tm != null) {
                     if ( tm.getIndex() == 0) {
                         continue;  // Don't place Fixture.index 0 tiles.
+                    }
+
+                    TileView t = new TileView(tm, zone); //, x, y);                
+                    getChildren().add(t);
+                } 
+            }
+        }
+    }
+
+    private void buildEntities() {
+        log.log(Level.INFO, "  Build Entities" );
+        for (int y = 0; y < zone.getHeight(); y++) {
+            for (int x = 0; x < zone.getWidth(); x++) {
+                Tile tm = zone.getEntityTile(x, y);
+                if (tm != null) {
+                    if ( tm.getIndex() == 0) {
+                        continue;  // Don't place Entity.index 0 tiles.
                     }
 
                     TileView t = new TileView(tm, zone); //, x, y);                

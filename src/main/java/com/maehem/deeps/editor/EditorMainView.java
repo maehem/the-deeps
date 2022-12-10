@@ -69,12 +69,12 @@ public class EditorMainView {
         EditorTilePropertiesPane tileProperties = new EditorTilePropertiesPane(MapTile.class);
         EditorTilePropertiesPane itemProperties = new EditorTilePropertiesPane(FixtureTile.class);
         VBox rightBar = new VBox(tileProperties, itemProperties);
-        rightBar.setMaxWidth(WIDTH/4.0);
+        rightBar.setMaxWidth(WIDTH/5.0);
         tileProperties.setFillWidth(true);
-        tileProperties.setMinHeight(HEIGHT/2);
+        tileProperties.setMinHeight(HEIGHT/5);
         tileProperties.setMinWidth(WIDTH/5.0);
         itemProperties.setFillWidth(true);
-        itemProperties.setMinHeight(HEIGHT/2);
+        itemProperties.setMinHeight(HEIGHT/5);
         itemProperties.setMinWidth(WIDTH/5.0);
         
         Node zoneTabs = new EditorZoneTabPane();

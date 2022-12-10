@@ -42,6 +42,7 @@ public class Zone {
     
     private static final String BASE_PROP_KEY = "base.";
     private static final String ITEM_PROP_KEY = "item.";
+    private static final String ENTITY_PROP_KEY = "entity.";
 
     //public static enum TileType { BASE, ITEM };
 
@@ -56,6 +57,7 @@ public class Zone {
     private MapTile[][] baseTile;
     
     private ArrayList<FixtureTile> fixtures = new ArrayList<>();
+    private ArrayList<EntityTile> entities = new ArrayList<>();
 
     /**
      * Construct a new Zone using data, usually from a dialog.
@@ -117,6 +119,7 @@ public class Zone {
                             Integer.parseInt(baseCode.substring(1))
                     ).clone();
                     if ( sheetBaseTile instanceof MapTile ) {
+                        sheetBaseTile.setZone(this);
                         sheetBaseTile.setXY(x,y);
                         sheetBaseTile.setSheet(baseCode.charAt(0));
                         // Apply flags for this tile.
@@ -143,13 +146,53 @@ public class Zone {
                                 Integer.parseInt(mnemonic.substring(1))
                         ).clone();
                         if (sheetItemTile instanceof FixtureTile) {
+                            sheetItemTile.setZone(this);
                             sheetItemTile.setXY(x, y);
                             sheetItemTile.setSheet(mnemonic.charAt(0));
                             sheetItemTile.applyFlags(pFlags.substring(pFlags.indexOf(":") + 1));
                             fixtures.add((FixtureTile) sheetItemTile);
-                        } else {
+                        } 
+//                        if (sheetItemTile instanceof EntityTile) {
+//                            sheetItemTile.setZone(this);
+//                            sheetItemTile.setXY(x, y);
+//                            sheetItemTile.setSheet(mnemonic.charAt(0));
+//                            sheetItemTile.applyFlags(pFlags.substring(pFlags.indexOf(":") + 1));
+//                            entities.add((EntityTile) sheetItemTile);
+//                        }
+                        else {
                             log.log(Level.SEVERE, 
                                     "Item tile at {0},{1} is not a Fixture Tile! Obj:{2}",
+                                    new Object[]{x, y, sheetItemTile});
+                        }
+                    } catch (CloneNotSupportedException ex) {
+                        log.log(Level.SEVERE, "Could not clone uid:" + sheetUid + ":" + mnemonic, ex);
+                    }
+                }
+                // Process any FixtureTile at this grid location
+                pFlags = flags.getProperty(ENTITY_PROP_KEY + (y * width + x));
+                if (pFlags != null) {
+                    String mnemonic = pFlags.split(":")[0];
+                    try {
+                        // Clone the tile from the sheet.
+                        Tile sheetItemTile = (Tile) sheet.getTile(
+                                Integer.parseInt(mnemonic.substring(1))
+                        ).clone();
+//                        if (sheetItemTile instanceof FixtureTile) {
+//                            sheetItemTile.setZone(this);
+//                            sheetItemTile.setXY(x, y);
+//                            sheetItemTile.setSheet(mnemonic.charAt(0));
+//                            sheetItemTile.applyFlags(pFlags.substring(pFlags.indexOf(":") + 1));
+//                            fixtures.add((FixtureTile) sheetItemTile);
+//                        }
+                        if (sheetItemTile instanceof EntityTile) {
+                            sheetItemTile.setZone(this);
+                            sheetItemTile.setXY(x, y);
+                            sheetItemTile.setSheet(mnemonic.charAt(0));
+                            sheetItemTile.applyFlags(pFlags.substring(pFlags.indexOf(":") + 1));
+                            entities.add((EntityTile) sheetItemTile);
+                        }else {
+                            log.log(Level.SEVERE, 
+                                    "Item tile at {0},{1} is not a Entity Tile! Obj:{2}",
                                     new Object[]{x, y, sheetItemTile});
                         }
                     } catch (CloneNotSupportedException ex) {
@@ -188,9 +231,24 @@ public class Zone {
         FixtureTile t = getFixtureTile(x, y);
         boolean result = false;
         if ( t != null ) {
-            result = fixtures.remove((FixtureTile)t);
+            result = fixtures.remove(t);
             log.log(Level.INFO, 
-                    "Removed existing FixtureTile at: {0}{1}", 
+                    "Removed existing FixtureTile at: {0}x{1}", 
+                    new Object[]{t.getX(), t.getY()}
+            );
+            notifyTileSwapped(t, null); 
+        }
+        
+        return result;
+    }
+    
+    public boolean removeEntity( int x, int y ) {
+        EntityTile t = getEntityTile(x, y);
+        boolean result = false;
+        if ( t != null ) {
+            result = entities.remove(t);
+            log.log(Level.INFO, 
+                    "Removed existing EntityTile at: {0}x{1}", 
                     new Object[]{t.getX(), t.getY()}
             );
             notifyTileSwapped(t, null); 
@@ -208,7 +266,7 @@ public class Zone {
      * @param t the new tile.
      */
     public void swapTile(/*TileType type,*/ int x, int y, Tile t ) {
-        Tile oldTile = null;
+        Tile oldTile;
         if ( t instanceof MapTile ) {
             log.log(Level.INFO, "Swapping a MapTile.");
             oldTile = baseTile[y][x];
@@ -229,6 +287,20 @@ public class Zone {
                 );
             }
             fixtures.add((FixtureTile)t);
+            // Notify tile change.
+            notifyTileSwapped(oldTile, t); 
+        } else if ( t instanceof EntityTile ) {
+            log.log(Level.INFO, "Swapping a EntityTile.");
+            t.setXY(x,y);
+            oldTile = getEntityTile(x, y);
+            if ( oldTile != null ) {
+                entities.remove((EntityTile)oldTile);
+                log.log(Level.INFO, 
+                        "Removed existing EntityTile at: {0}{1}", 
+                        new Object[]{oldTile.getX(), oldTile.getY()}
+                );
+            }
+            entities.add((EntityTile)t);
             // Notify tile change.
             notifyTileSwapped(oldTile, t); 
         } else {
@@ -267,7 +339,7 @@ public class Zone {
             throw new ZoneFileFormatException("Zone file does not seem to have 'name:' defined!");
         }
         String name = line.split(": ")[1];
-        log.log(Level.INFO, "Reading Zone file for: " + name);
+        log.log(Level.INFO, "Reading Zone file for: {0}", name);
 
         while ( line != null && !line.startsWith("IDX")) {
             line = br.readLine();
@@ -352,7 +424,7 @@ public class Zone {
                 bw.newLine();
             }
             
-            // Write item tile properties
+            // Write fixture tile properties
             bw.write("# Fixture Tile Flags");
             bw.newLine();
             for (int y = 0; y < height; y++) {
@@ -367,7 +439,23 @@ public class Zone {
                     }
                 }
             }
-            
+            bw.newLine();
+
+            // Write entity tile properties
+            bw.write("# Entity Tile Flags");
+            bw.newLine();
+            for (int y = 0; y < height; y++) {
+                for (int x = 0; x < width; x++) {
+                    EntityTile t = getEntityTile(x, y);
+                    if ( t != null ) {
+                        bw.write(ENTITY_PROP_KEY + (y*width+x) + " = " + 
+                                t.getMnemonic() + ":" +
+                                t.getFlags()
+                        );
+                        bw.newLine();
+                    }
+                }
+            }
             
 
         } catch (IOException ex) {
@@ -377,7 +465,7 @@ public class Zone {
         
         return true;
     }
-    
+
     public SheetModel getSheet( Character key ) {
         log.log(Level.FINER, "Zone.getSheet( {0} )", key);
         log.log( Level.FINER, "Sheets:");
@@ -415,6 +503,16 @@ public class Zone {
     
     public FixtureTile getFixtureTile( int x, int y ) {
         for( FixtureTile t: fixtures ) {
+            if ( t.getX() == x && t.getY() == y ) {
+                return t;
+            }
+        }
+        
+        return null;
+    }
+    
+    public EntityTile getEntityTile( int x, int y ) {
+        for( EntityTile t: entities ) {
             if ( t.getX() == x && t.getY() == y ) {
                 return t;
             }

@@ -18,10 +18,13 @@ package com.maehem.deeps.view;
 
 import static com.maehem.deeps.Deeps.log;
 import com.maehem.deeps.model.FixtureTile;
+import static com.maehem.deeps.model.FixtureTile.SHAD;
+import com.maehem.deeps.model.IntegerTileProperty;
 import com.maehem.deeps.model.MapTile;
 import com.maehem.deeps.model.SheetModel;
 import com.maehem.deeps.model.Tile;
 import com.maehem.deeps.model.TileListener;
+import com.maehem.deeps.model.TileProperty;
 import com.maehem.deeps.model.Zone;
 import java.util.logging.Level;
 import javafx.geometry.Bounds;
@@ -166,11 +169,26 @@ public class TileView extends Group implements TileListener {
 
     @Override
     public void tilePropertyChanged(Tile tile, String propName) {
-        log.log(Level.INFO, "Tile Property changed: " + propName);
-        if ( propName.equals("umbra") ) {
-            if ( tile instanceof FixtureTile ) {
-                FixtureTile t = (FixtureTile) tile;
-                setDropShadow(t.getUmbra());
+//        log.log(Level.INFO, "(old)TileView: Tile Property changed: {0}", propName);
+//        if ( propName.equals("umbra") ) {
+//            if ( tile instanceof FixtureTile ) {
+//                FixtureTile t = (FixtureTile) tile;
+//                setDropShadow(t.getUmbra());
+//            }
+//        }
+    }
+
+    @Override
+    public void tilePropertyChanged(TileProperty property) {
+        log.log(Level.FINER, "TileView: Tile Property changed: {0}", property.getFlag());
+        if ( property.getParent() instanceof FixtureTile ) {
+            FixtureTile t = (FixtureTile) property.getParent();
+            switch (property.getFlag() ) {
+                case SHAD:
+                    if ( property instanceof IntegerTileProperty ) {
+                        setDropShadow(((IntegerTileProperty) property).getValue());
+                    }
+                    break;
             }
         }
     }

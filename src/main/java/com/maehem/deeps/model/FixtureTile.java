@@ -17,6 +17,7 @@
 package com.maehem.deeps.model;
 
 import static com.maehem.deeps.Deeps.log;
+import static com.maehem.deeps.model.IntegerTileProperty.EditStyle.*;
 import java.util.logging.Level;
 
 /**
@@ -28,6 +29,14 @@ import java.util.logging.Level;
  */
 public class FixtureTile extends Tile {
 
+    
+    public static final String TRAK = "TRAK";
+    public static final String SHAD = "SHAD";
+    public static final String WEAP = "WEAP";
+    public static final String WEAR = "WEAR";
+    public static final String INVT = "INVT";
+    public static final String STOR = "STOR";
+    
     public static final int TRACK_DEFAULT      = -1;
     public static final int UMBRA_DEFAULT      = -1;
     public static final int WEAPON_DEFAULT     = -1;
@@ -41,33 +50,60 @@ public class FixtureTile extends Tile {
     private int harvestable = -1; // HP to harvest. -1=no. 0=free to pick. 1-99 Nailed down, hits needed.
     private boolean autoHarvest = false; // Will go into player inventory if free.
     
-    private int ablation  = ABLATION_DEFAULT;       // -1 = cannont be worn/damaged. >= 0.  degrades over time. Max 99
-    private int inventoryItem = INVENTORY_DEFAULT;  // -1 = not inventory. > 000-999 index in game
-    private int storage   = STORAGE_DEFAULT;        // -1 = cannot store items. 0-999 = game index of storage item.
-    private int track     = TRACK_DEFAULT;          // -1 = not track, track element, can move 'rolling' items.
-    private int umbra     = UMBRA_DEFAULT;          // -1 = not casting shade, 0-99 cast drop shadow.
-    private int weapon    = WEAPON_DEFAULT;         // -1 = not weapoon. 000-999 = damage. 0 = damaged weapon
+//    private int ablation  = ABLATION_DEFAULT;       // -1 = cannont be worn/damaged. >= 0.  degrades over time. Max 99
+//    private int inventoryItem = INVENTORY_DEFAULT;  // -1 = not inventory. > 000-999 index in game
+//    private int storage   = STORAGE_DEFAULT;        // -1 = cannot store items. 0-999 = game index of storage item.
+//    private int track     = TRACK_DEFAULT;          // -1 = not track, track element, can move 'rolling' items.
+//    private int umbra     = UMBRA_DEFAULT;          // -1 = not casting shade, 0-99 cast drop shadow.
+//    private int weapon    = WEAPON_DEFAULT;         // -1 = not weapoon. 000-999 = damage. 0 = damaged weapon
 
     public FixtureTile(Zone zone, Character sheet, int index, int x, int y, String props) {
-        super(zone, sheet, index, x, y, props);
+        super(zone, sheet, index, x, y ); //, props);
         
         // Apply props (local)
+        initProperties();
         applyFlags(props);
     }
 
     public FixtureTile(Zone zone, int index, int x, int y, String props) {
-        super(zone, index, x, y, props);
+        super(zone, index, x, y ); //, props);
         
         // Apply props (local)
+        initProperties();
         applyFlags(props);
     }
     
-    public int getAblation() {
-        return ablation;
+    private void initProperties() {
+        getProperties().add(new IntegerTileProperty(
+                this, TRAK, "Track/Rail", 
+                -1, 99, TRACK_DEFAULT, TEXT_FIELD));
+        getProperties().add(new IntegerTileProperty(
+                this, SHAD, "Drop Shadow", 
+                -1, 99, UMBRA_DEFAULT, SLIDER));
+        getProperties().add(new IntegerTileProperty(
+                this, WEAP, "Weapon Damage", 
+                -1, 99, WEAPON_DEFAULT, SLIDER));
+        getProperties().add(new IntegerTileProperty(
+                this, WEAR, "Durability", 
+                -1, 99, ABLATION_DEFAULT, SLIDER));
+        getProperties().add(new IntegerTileProperty(
+                this, INVT, "Inventory Index",
+                -1, 999, INVENTORY_DEFAULT, TEXT_FIELD));
+        getProperties().add(new IntegerTileProperty(
+                this, STOR, "Storage Vault", 
+                -1, 999, STORAGE_DEFAULT, TEXT_FIELD));
     }
     
-    public void setAblation( int newValue )  {
-        ablation = newValue;
+    public int getAblation() {
+        return ((IntegerTileProperty)getProperty(WEAR)).getValue();
+//        return ablation;
+    }
+    
+    public void setAblation( int val )  {
+        //ablation = newValue;
+        IntegerTileProperty prop = (IntegerTileProperty)getProperty(WEAR);
+        prop.setValue(val);
+        notifyPropertyChanged(prop);
     }
     
     public void applyAblation(int amount) {
@@ -87,68 +123,88 @@ public class FixtureTile extends Tile {
     }
 
     public int getInventoryItem() {
-        return inventoryItem;
+        return ((IntegerTileProperty)getProperty(INVT)).getValue();
+        //return inventoryItem;
     }
     
-    public void setInventoryItem( int i) {
-        this.inventoryItem = i;
+    public void setInventoryItem( int index) {
+        //this.inventoryItem = i;
+        IntegerTileProperty prop = (IntegerTileProperty)getProperty(INVT);
+        prop.setValue(index);
+        notifyPropertyChanged(prop);
     }
     
     public boolean isInventoryItem() {
-        return inventoryItem >= 0;
+        return getInventoryItem() >= 0;
     }
     
     /**
      * @return the storage
      */
     public int getStorage() {
-        return storage;
+        return ((IntegerTileProperty)getProperty(STOR)).getValue();
+        //return storage;
     }
 
     /**
-     * @param storage the storage to set
+     * @param index the storage index to set
      */
-    public void setStorage(int storage) {
-        this.storage = storage;
+    public void setStorage(int index) {
+        //this.storage = storage;
+        IntegerTileProperty prop = (IntegerTileProperty)getProperty(STOR);
+        prop.setValue(index);
+        notifyPropertyChanged(prop);
     }
 
     public int getUmbra() {
-        return umbra;
+        return ((IntegerTileProperty)getProperty(SHAD)).getValue();
+        //return umbra;
     }
     
-    public void setUmbra( int umbra ) {
-        this.umbra = umbra;
-        notifyPropertyChanged("umbra");
+    public void setUmbra( int val ) {
+        IntegerTileProperty prop = (IntegerTileProperty)getProperty(SHAD);
+        prop.setValue(val);
+        //this.umbra = umbra;
+        //notifyPropertyChanged("umbra");
+        notifyPropertyChanged(prop);
     }
     
     public int getWeapon() {
-        return weapon;
+        return ((IntegerTileProperty)getProperty(WEAP)).getValue();
+        //return weapon;
     }
     
     public void setWeapon(int damage) {
-        this.weapon = damage;
+        //this.weapon = damage;
+        IntegerTileProperty prop = (IntegerTileProperty)getProperty(WEAP);
+        prop.setValue(damage);
+        notifyPropertyChanged(prop);
     }
     
     public boolean isWeapon() {
-        return weapon >= 0;
+        return getWeapon() >= 0;
     }
     
     /**
      * @return the track
      */
     public boolean isTrack() {
-        return track>=0;
+        return getTrack() >= 0;
     }
 
     public int getTrack() {
-        return track;
+        return ((IntegerTileProperty)getProperty(TRAK)).getValue();
+        //return track;
     }
     
     /**
      * @param track the track to set
      */
     public void setTrack(int track) {
-        this.track = track;
+        //this.track = track;
+        IntegerTileProperty prop = (IntegerTileProperty)getProperty(TRAK);
+        prop.setValue(track);
+        notifyPropertyChanged(prop);
     }
     
     @Override
