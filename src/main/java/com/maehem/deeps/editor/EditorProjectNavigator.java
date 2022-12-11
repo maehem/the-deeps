@@ -135,7 +135,7 @@ public class EditorProjectNavigator extends VBox implements EditorProjectListene
             zonesPane.setDisable(true);
             sheetsPane.setDisable(true);
         } else {
-            zonesPane.setDisable(false);
+            zonesPane.setDisable(project.getSheets().isEmpty());
             sheetsPane.setDisable(false);
         }
 
