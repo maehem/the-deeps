@@ -155,13 +155,6 @@ public class Zone {
                             sheetItemTile.applyFlags(pFlags.substring(pFlags.indexOf(":") + 1));
                             fixtures.add((FixtureTile) sheetItemTile);
                         } 
-//                        if (sheetItemTile instanceof EntityTile) {
-//                            sheetItemTile.setZone(this);
-//                            sheetItemTile.setXY(x, y);
-//                            sheetItemTile.setSheet(mnemonic.charAt(0));
-//                            sheetItemTile.applyFlags(pFlags.substring(pFlags.indexOf(":") + 1));
-//                            entities.add((EntityTile) sheetItemTile);
-//                        }
                         else {
                             log.log(Level.SEVERE, 
                                     "Item tile at {0},{1} is not a Fixture Tile! Obj:{2}",
@@ -171,7 +164,7 @@ public class Zone {
                         log.log(Level.SEVERE, "Could not clone uid:" + sheetUid + ":" + mnemonic, ex);
                     }
                 }
-                // Process any FixtureTile at this grid location
+                // Process any EntityTile at this grid location
                 pFlags = flags.getProperty(ENTITY_PROP_KEY + (y * width + x));
                 if (pFlags != null) {
                     String mnemonic = pFlags.split(":")[0];
@@ -180,13 +173,6 @@ public class Zone {
                         Tile sheetItemTile = (Tile) sheet.getTile(
                                 Integer.parseInt(mnemonic.substring(1))
                         ).clone();
-//                        if (sheetItemTile instanceof FixtureTile) {
-//                            sheetItemTile.setZone(this);
-//                            sheetItemTile.setXY(x, y);
-//                            sheetItemTile.setSheet(mnemonic.charAt(0));
-//                            sheetItemTile.applyFlags(pFlags.substring(pFlags.indexOf(":") + 1));
-//                            fixtures.add((FixtureTile) sheetItemTile);
-//                        }
                         if (sheetItemTile instanceof EntityTile) {
                             sheetItemTile.setZone(this);
                             sheetItemTile.setXY(x, y);
