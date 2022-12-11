@@ -70,22 +70,22 @@ public class EditorMainView {
         EditorTilePropertiesPane tileProperties = new EditorTilePropertiesPane(MapTile.class);
         EditorTilePropertiesPane itemProperties = new EditorTilePropertiesPane(FixtureTile.class);
         EditorTilePropertiesPane entityProperties = new EditorTilePropertiesPane(EntityTile.class);
+        
         VBox rightBar = new VBox(tileProperties, itemProperties, entityProperties );
         rightBar.setMaxWidth(WIDTH/5.0);
         
         tileProperties.setFillWidth(true);
         tileProperties.setMinHeight(HEIGHT/5);
-        //tileProperties.setMinWidth(WIDTH/5.0);
+        
         itemProperties.setFillWidth(true);
         itemProperties.setMinHeight(HEIGHT/5);
-        //itemProperties.setMinWidth(WIDTH/5.0);
+        
         entityProperties.setFillWidth(true);
         entityProperties.setMinHeight(HEIGHT/5);
-        //entityProperties.setMinWidth(WIDTH/5.0);
         
         Node zoneTabs = new EditorZoneTabPane();
         
-        VBox.setVgrow(sheetView, Priority.SOMETIMES );
+        //VBox.setVgrow(sheetView, Priority.SOMETIMES );
 
         root.setTop(toolbar);
         root.setRight(rightBar);

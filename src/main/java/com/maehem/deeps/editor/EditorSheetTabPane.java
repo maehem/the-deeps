@@ -33,6 +33,7 @@ public class EditorSheetTabPane extends TabPane implements EditorProjectListener
 
     public EditorSheetTabPane() throws IOException {
         this.project = EditorProject.getInstance();
+        setMinHeight(30);
         project.addListener(this);
     }
 
