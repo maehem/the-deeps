@@ -188,7 +188,7 @@ public class EditorProjectNavigator extends VBox implements EditorProjectListene
             EditorDialogs.sheetSettingsDialog(project, sm);
         });
         HBox itemArea = new HBox(nameLabel, spacer, propsButton);
-        nameLabel.setTooltip(new Tooltip(sm.getWidth() + "x" + sm.getHeight() + " tiles.\ntile size: " + sm.getSize()));
+        nameLabel.setTooltip(createSheetTooltip(sm));
         itemArea.setPadding(new Insets(0, 0, 0, 20));
         return itemArea;
     }
@@ -280,5 +280,22 @@ public class EditorProjectNavigator extends VBox implements EditorProjectListene
         b.setTooltip(new Tooltip(name));
 
         return b;
+    }
+    
+    private static Tooltip createSheetTooltip(SheetModel sheet  ) {
+        StringBuilder sb = new StringBuilder(sheet.getName() );
+        sb.append("\n   by: ").append(sheet.getAuthor());
+        sb.append("\n          ").append(sheet.getWidth()).append("x").append(sheet.getHeight());
+        sb.append("  size: ").append(sheet.getSize());
+        sb.append("\n  UID: ").append(sheet.getUID());
+        
+        Tooltip tt = new Tooltip(sb.toString());
+        ImageView imageView = new ImageView(sheet.getImage());
+        imageView.setPreserveRatio(true);
+        imageView.setFitHeight(64);
+        tt.setGraphic(imageView);
+        tt.setGraphicTextGap(12);
+        
+        return tt;
     }
 }
