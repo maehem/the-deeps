@@ -332,17 +332,17 @@ public class EditorDialogs {
                 + "Enter info and press Okay (or click title bar 'X' for cancel).");
         dialog.setResizable(true);
 
-        Label nameLabel = new Label("Name: ");
-        Label uidLabel = new Label("UID: ");
+//        Label nameLabel = new Label("Name: ");
+//        Label uidLabel = new Label("UID: ");
         Label pathLabel = new Label("Path: ");
         //Label widthLabel = new Label("Width: ");
         //Label heightLabel = new Label("Height: ");
-        Label sizeLabel = new Label("Tile Size: ");
-        Label authorLabel = new Label("Author: ");
+//        Label sizeLabel = new Label("Tile Size: ");
+//        Label authorLabel = new Label("Author: ");
 
         // TODO: Add code to only allow numeric entry.
-        TextField nameText = new TextField("Sheet" + (int) (Math.random() * 10000));
-        TextField uidText = new TextField(String.valueOf((Math.random() * Long.MAX_VALUE)));
+//        TextField nameText = new TextField("Sheet" + (int) (Math.random() * 10000));
+//        TextField uidText = new TextField(String.valueOf((Math.random() * Long.MAX_VALUE)));
         //TextField pathText = new TextField(project.getFilePath());
         TextField pathText = new TextField("");
         Button pathButton = createIconButton("Select Project Folder", "/icons/folder.png");
@@ -350,25 +350,25 @@ public class EditorDialogs {
         HBox pathBox = new HBox(pathText, pathButton);
         //TextField widthText = new TextField(String.valueOf(12));
         //TextField heightText = new TextField(String.valueOf(12));
-        TextField sizeText = new TextField("16");
-        TextField authorText = new TextField("Unknown");
+//        TextField sizeText = new TextField("16");
+//        TextField authorText = new TextField("Unknown");
 
         GridPane grid = new GridPane();
 
-        grid.add(nameLabel, 1, 1);
-        grid.add(nameText, 2, 1);
+//        grid.add(nameLabel, 1, 1);
+//        grid.add(nameText, 2, 1);
+//
+//        grid.add(uidLabel, 1, 2);
+//        grid.add(uidText, 2, 2);
 
-        grid.add(uidLabel, 1, 2);
-        grid.add(uidText, 2, 2);
+        grid.add(pathLabel, 1, 1);
+        grid.add(pathBox, 2, 1);
 
-        grid.add(pathLabel, 1, 3);
-        grid.add(pathBox, 2, 3);
-
-        grid.add(sizeLabel, 1, 4);
-        grid.add(sizeText, 2, 4);
-
-        grid.add(authorLabel, 1, 5);
-        grid.add(authorText, 2, 5);
+//        grid.add(sizeLabel, 1, 4);
+//        grid.add(sizeText, 2, 4);
+//
+//        grid.add(authorLabel, 1, 5);
+//        grid.add(authorText, 2, 5);
 
         dialog.getDialogPane().setContent(grid);
 
@@ -380,8 +380,19 @@ public class EditorDialogs {
             );
             File newSheetFile = sheetChooser.showOpenDialog(stage);
             if (newSheetFile != null) {
-                pathText.setText(newSheetFile.getAbsolutePath());
-            }
+                File propSrc = new File(
+                       newSheetFile.getParentFile(),
+                       newSheetFile.getName().split(".png")[0] + ".properties"
+                );
+                if ( propSrc.exists() ) {
+                    pathText.setText(newSheetFile.getAbsolutePath());
+                } else {
+                    Alert alert = new Alert(AlertType.WARNING);
+                    alert.setHeaderText("PNG file needs a properties file!");
+                    alert.setContentText("Use the Sheets Editor to create usable sheets.");
+                    alert.show();                    
+                }
+           }
         });
 
         ButtonType buttonTypeOk = new ButtonType("Create", ButtonBar.ButtonData.OK_DONE);
@@ -427,7 +438,15 @@ public class EditorDialogs {
                                             copy.getFileName());
                                     return new SheetModel(dest);
                                 }
+                            } else {
+                                // Present dialog for sheet settings.
+                                
+                                
+                                // finally
+                                //  return new SheetModel( dest );
                             }
+                            
+                            
 //                            Properties sheetProps = new Properties();
 //                            sheetProps.put("name", nameText.getText());
 //                            sheetProps.put("size", sizeText.getText());
@@ -442,12 +461,13 @@ public class EditorDialogs {
                             //project.registerSheet(sheet);
                             //project.notifyProjectChanged();
                             //return new SheetModel(dest);
-                            return SheetModel.createSheet(dest,
-                                    nameText.getText(),
-                                    Long.valueOf(uidText.getText()),
-                                    sizeText.getText(),
-                                    authorText.getText()
-                            );
+//                            return SheetModel.createSheet(dest,
+//                                    nameText.getText(),
+//                                    Long.valueOf(uidText.getText()),
+//                                    sizeText.getText(),
+//                                    authorText.getText()
+//                            );
+                            return null;
                         }
 
                     } catch (IOException ex) {
