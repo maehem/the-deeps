@@ -73,7 +73,8 @@ public class EditorToolbar extends ToolBar implements EditorProjectListener {
                 Priority.SOMETIMES
         );
         
-        getItems().addAll(newFileButton,
+        getItems().addAll(
+                newFileButton,
                 openButton,
                 saveButton,
                 createSeparator(),
@@ -92,6 +93,20 @@ public class EditorToolbar extends ToolBar implements EditorProjectListener {
         this.project.addListener(this);
         updateState();
         
+        newFileButton.setOnAction((t) -> {
+            // Prompt to save if project.edited
+            if ( project.isEdited() ) {
+                EditorDialogs.confirmCloseEditedProjectDialog(project, stage);
+                // dialog calls project.clear() if user confirms.
+            } else {
+                project.clear();
+            }
+            updateState();
+        });
+        
+        openButton.setOnAction((t) -> {
+        });
+        
         saveButton.setOnAction((t) -> {
             if ( project.getFilePath().equals("") ) {
                 EditorDialogs.projectSettingsDialog(project, stage);
@@ -102,7 +117,8 @@ public class EditorToolbar extends ToolBar implements EditorProjectListener {
     }
     
     private void updateState() {
-        saveButton.setDisable(!project.getFilePath().equals("") && !project.isEdited());
+        //saveButton.setDisable(!project.getFilePath().equals("") && !project.isEdited());
+        saveButton.setDisable(!project.isEdited());
     }
     
     private Separator createSeparator() {

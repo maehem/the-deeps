@@ -29,7 +29,7 @@ public class MapTile extends Tile {
     }
 
     public MapTile(Zone zone, int index, int x, int y, String props) {
-        super(zone, index, x, y );//, props);
+        super(zone, 'A', index, x, y );//, props);
         applyFlags(props);
     }
 

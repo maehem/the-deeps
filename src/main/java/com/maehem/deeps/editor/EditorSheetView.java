@@ -229,5 +229,8 @@ public class EditorSheetView extends VBox implements EditorProjectListener {
                 }
             }
         }
+        if ( type == ChangeType.CLEARED ) {
+            project.removeListener(this);
+        }
     }
 }

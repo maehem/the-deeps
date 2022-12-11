@@ -91,7 +91,12 @@ public final class EditorProject implements GameModel {
 
         ArrayList<String> projects = loadPreviousProjects();
         if ( !projects.isEmpty() ) {
-            readFile( new File(projects.get(0) ) );
+            try {
+                readFile( new File(projects.get(0) ) );
+                notifyProjectChanged(this, ChangeType.LOADED);
+            } catch (FileNotFoundException ex) {
+                Logger.getLogger(EditorProject.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
         
         notifyProjectChanged(this, ChangeType.LOADED);
@@ -109,6 +114,20 @@ public final class EditorProject implements GameModel {
         return edited;
     }
 
+    public void clear() {
+        setName("New Project");
+        setFilePath(null);
+        setEdited(false);
+        setFocusedEntityTile(null);
+        setFocusedFixtureTile(null);
+        setFocusedMapTile(null);
+        setCurrentSheetTile(-1L, null);
+        setFunction(Function.SELECT);
+        sheets.clear();
+        zones.clear();
+        notifyProjectChanged(this, ChangeType.CLEARED);
+    }
+    
     public boolean addListener(EditorProjectListener l) {
         return listeners.add(l);
     }
@@ -155,36 +174,10 @@ public final class EditorProject implements GameModel {
         return projectDir.getAbsolutePath();
     }
     
-//    public String getCurrentTile() {
-//        return currentTile;
-//    }
-
     public long getCurrentTileUID() {
         return currentTileUID;
     }
     
-//    public int getCurrentTileNum() {
-//        return currentTileNum;
-//    }
-//    
-//    public void setCurrentTile( long uid, int tilenum ) {
-//        currentTileUID = uid;
-//        currentTileNum = tilenum;
-//        log.log(Level.INFO, 
-//                "Project current tile uid:{0}  tile:{1}",
-//                new Object[]{ uid, tilenum }
-//        );
-//        notifyProjectChanged(this,ChangeType.TILE);
-//    }
-    
-//    public void setCurrentTile( String tile ) {
-//        currentTile = tile;
-//        log.log(Level.INFO, 
-//                "Project current tile set to: {0}", currentTile
-//        );
-//        notifyProjectChanged(this,ChangeType.TILE);
-//    }
-
     public File getSheetsDir() {
         return new File(projectDir, "sheets");
     }
@@ -199,6 +192,11 @@ public final class EditorProject implements GameModel {
 
     public List<SheetModel> getSheets() {
         return sheets;
+    }
+
+    @Override
+    public SheetModel getDefaultSheet() {
+        return sheets.get(0);
     }
 
     public void doSave() {
@@ -265,7 +263,7 @@ public final class EditorProject implements GameModel {
         }
     }
 
-    private void readFile(File projDir) {
+    private void readFile(File projDir) throws FileNotFoundException {
         File propertiesFile = new File(projDir, "project.properties");
         Properties p = new Properties();
         try {
@@ -273,6 +271,7 @@ public final class EditorProject implements GameModel {
             p.load(is);
         } catch (FileNotFoundException ex) {
             log.log(Level.SEVERE, "Project File Not Found", ex);
+            throw ex;
         } catch (IOException ex) {
             log.log(Level.SEVERE, "Project File IO Exception", ex);
         }
@@ -442,7 +441,7 @@ public final class EditorProject implements GameModel {
         this.currentSheetTile = t;
         log.log(Level.INFO, 
                 "Project current tile   tile:{0}",
-                new Object[]{ t.getMnemonic() }
+                new Object[]{ t==null?"null":t.getMnemonic() }
         );
         notifyProjectChanged(this,ChangeType.TILE);
     }

@@ -84,6 +84,12 @@ public class StartingZone /*extends ZoneView*/ implements GameModel {
     }
 
     @Override
+    public SheetModel getDefaultSheet() {
+        return null;
+    }
+
+    
+    @Override
     public void addSheet(SheetModel sheet) {
     }
     

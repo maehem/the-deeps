@@ -86,13 +86,8 @@ public class EditorProjectNavigator extends VBox implements EditorProjectListene
             //collapseZones();
         });
 
-//        Button collapseZonesButton = createSizedButton("Collapse", -4);
-//        collapseZonesButton.setOnAction((t) -> {
-//            collapseZones();
-//        });
         ArrayList<Node> zoneBtnList = new ArrayList<>();
         zoneBtnList.add(newZoneButton);
-//        zoneBtnList.add( collapseZonesButton);
 
         // Sheets Toolbar
         Button newZSheetButton = createSizedButton("New Sheet", -4);
@@ -100,16 +95,10 @@ public class EditorProjectNavigator extends VBox implements EditorProjectListene
             // Create a new Zone
             actionCreateNewSheet(stage);
             updateTree();
-            //collapseZones();
         });
 
-//        Button collapseSheetsButton = createSizedButton("Collapse", -4);
-//        collapseSheetsButton.setOnAction((t) -> {
-//            collapseZones();
-//        });
         ArrayList<Node> sheetBtnList = new ArrayList<>();
         sheetBtnList.add(newZSheetButton);
-//        sheetBtnList.add( collapseSheetsButton);
 
         zonesPane = createFancyTitlePane("Zones", zoneBtnList);
         zonesPane.setContent(zonesListNode);
@@ -167,12 +156,12 @@ public class EditorProjectNavigator extends VBox implements EditorProjectListene
                     zone.getName()
             );
         }
-
     }
 
     @Override
     public void projectStateChanged(EditorProject p, ChangeType type) {
-        if (    type == ChangeType.LOADED || 
+        if (    type == ChangeType.LOADED ||
+                type == ChangeType.CLEARED ||
                 type == ChangeType.SHEET_NAME || 
                 type == ChangeType.ZONE_NAME
             ) {

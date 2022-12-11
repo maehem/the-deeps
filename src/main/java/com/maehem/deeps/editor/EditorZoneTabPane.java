@@ -41,20 +41,8 @@ public class EditorZoneTabPane extends TabPane implements EditorProjectListener 
     @Override
     public void projectStateChanged(EditorProject p, ChangeType type) {
         if (type == ChangeType.LOADED || type == ChangeType.ZONE_NAME) {
-            for (Tab t : getTabs()) {
-                if (t.getContent() instanceof EditorZoneTab) {
-
-                    EditorZoneTab tC = (EditorZoneTab) t.getContent();
-                    for (Node n : tC.getChildren()) {
-                        if (n instanceof EditorZoneEditor) {
-                            p.removeListener((EditorZoneEditor) n);
-                        }
-                    }
-                }
-            }
-
-            getTabs().clear();
-
+            clearTabs(p);
+             
             for (Zone zone : project.getZones()) {
                 EditorZoneTab zt = new EditorZoneTab(zone);
 
@@ -65,5 +53,24 @@ public class EditorZoneTabPane extends TabPane implements EditorProjectListener 
                 getTabs().add(tab);
             }
         }
+        if ( type == ChangeType.CLEARED ) {
+            clearTabs(p);
+        }
+    }
+    
+    private void clearTabs(EditorProject p) {
+        for (Tab t : getTabs()) {
+            if (t.getContent() instanceof EditorZoneTab) {
+
+                EditorZoneTab tC = (EditorZoneTab) t.getContent();
+                for (Node n : tC.getChildren()) {
+                    if (n instanceof EditorZoneEditor) {
+                        p.removeListener((EditorZoneEditor) n);
+                    }
+                }
+            }
+        }
+
+        getTabs().clear();
     }
 }

@@ -23,5 +23,6 @@ package com.maehem.deeps.model;
 public interface GameModel {
     //public SheetModel getSheet( Character key );
     public SheetModel getSheet(Long uid);
+    public SheetModel getDefaultSheet();
     public void addSheet( SheetModel sheet );
 }

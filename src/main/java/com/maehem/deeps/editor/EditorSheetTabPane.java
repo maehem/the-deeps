@@ -16,6 +16,7 @@
  */
 package com.maehem.deeps.editor;
 
+import static com.maehem.deeps.editor.EditorProjectListener.ChangeType.CLEARED;
 import com.maehem.deeps.model.SheetModel;
 import java.io.IOException;
 import javafx.scene.control.Tab;
@@ -54,6 +55,8 @@ public class EditorSheetTabPane extends TabPane implements EditorProjectListener
                     getTabs().add(tab);
                 }
                 break;
+            case CLEARED:
+                getTabs().clear();
         }
     }
 

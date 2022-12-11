@@ -37,8 +37,8 @@ import java.util.logging.Level;
  */
 public class Zone {
 
-    public static final int WIDTH = 40;
-    public static final int HEIGHT = 30;
+    public static final int WIDTH = 10;
+    public static final int HEIGHT = 10;
     
     private static final String BASE_PROP_KEY = "base.";
     private static final String ITEM_PROP_KEY = "item.";
@@ -74,6 +74,9 @@ public class Zone {
         this.height = height;
         this.baseTile = new MapTile[height][width];
 
+        // Associate default sheet with 'A'
+        this.sheetMap.put('A', gm.getDefaultSheet().getUID() );
+        
         // Full map with default tiles.
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {

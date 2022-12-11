@@ -29,6 +29,7 @@ import java.util.logging.Level;
 import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
@@ -132,6 +133,8 @@ public class EditorDialogs {
                     project.setEdited(true);
                 }
                 project.doSave();
+                // Cause UI to rebuild.
+                project.notifyProjectChanged(project, EditorProjectListener.ChangeType.LOADED);
 
                 return "OK";
             }
@@ -190,7 +193,7 @@ public class EditorDialogs {
         if (result.isPresent()) {
             project.getZones().add(result.get());
             project.setEdited(true);
-            project.notifyProjectChanged(project,EditorProjectListener.ChangeType.ZONE_NAME);
+            project.notifyProjectChanged(project, EditorProjectListener.ChangeType.ZONE_NAME);
         }
     }
 
@@ -339,7 +342,7 @@ public class EditorDialogs {
 
         // TODO: Add code to only allow numeric entry.
         TextField nameText = new TextField("Sheet" + (int) (Math.random() * 10000));
-        TextField uidText = new TextField(String.valueOf((Math.random() * Long.MAX_VALUE) ));
+        TextField uidText = new TextField(String.valueOf((Math.random() * Long.MAX_VALUE)));
         //TextField pathText = new TextField(project.getFilePath());
         TextField pathText = new TextField("");
         Button pathButton = createIconButton("Select Project Folder", "/icons/folder.png");
@@ -351,7 +354,7 @@ public class EditorDialogs {
         TextField authorText = new TextField("Unknown");
 
         GridPane grid = new GridPane();
-        
+
         grid.add(nameLabel, 1, 1);
         grid.add(nameText, 2, 1);
 
@@ -366,7 +369,7 @@ public class EditorDialogs {
 
         grid.add(authorLabel, 1, 5);
         grid.add(authorText, 2, 5);
-        
+
         dialog.getDialogPane().setContent(grid);
 
         pathButton.setOnAction((ActionEvent t) -> {
@@ -399,7 +402,7 @@ public class EditorDialogs {
                             dest.getParentFile(),
                             dest.getName().split(".png")[0] + ".properties"
                     );
-                    
+
                     try {
                         Path copy = Files.copy(
                                 src.toPath(),
@@ -410,17 +413,17 @@ public class EditorDialogs {
                         );
                         if (copy != null) {
                             log.log(Level.WARNING, "Copied sheet PNG to: {0}", copy.toString());
-                            if ( propSrc.exists() ) { // Copy prop file to new location.
+                            if (propSrc.exists()) { // Copy prop file to new location.
                                 Path propCopy = Files.copy(
-                                    propSrc.toPath(),
-                                    propDest.toPath(),
-                                    java.nio.file.StandardCopyOption.REPLACE_EXISTING,
-                                    java.nio.file.StandardCopyOption.COPY_ATTRIBUTES,
-                                    NOFOLLOW_LINKS
+                                        propSrc.toPath(),
+                                        propDest.toPath(),
+                                        java.nio.file.StandardCopyOption.REPLACE_EXISTING,
+                                        java.nio.file.StandardCopyOption.COPY_ATTRIBUTES,
+                                        NOFOLLOW_LINKS
                                 );
-                                if ( propCopy != null ) {
-                                    log.log(Level.INFO, 
-                                            "Copied properties file for {0}", 
+                                if (propCopy != null) {
+                                    log.log(Level.INFO,
+                                            "Copied properties file for {0}",
                                             copy.getFileName());
                                     return new SheetModel(dest);
                                 }
@@ -439,10 +442,10 @@ public class EditorDialogs {
                             //project.registerSheet(sheet);
                             //project.notifyProjectChanged();
                             //return new SheetModel(dest);
-                            return SheetModel.createSheet(dest, 
+                            return SheetModel.createSheet(dest,
                                     nameText.getText(),
                                     Long.valueOf(uidText.getText()),
-                                    sizeText.getText(), 
+                                    sizeText.getText(),
                                     authorText.getText()
                             );
                         }
@@ -528,14 +531,14 @@ public class EditorDialogs {
                     }
                     if (project.isEdited()) {
                         project.notifyProjectChanged(
-                            project,EditorProjectListener.ChangeType.EDITED
+                                project, EditorProjectListener.ChangeType.EDITED
                         );
                     }
 
                     return "OK";
                 } else if (b == buttonTypeDelete) {
                     log.log(Level.INFO, "User selected Delete Sheet in Dialog.");
-                    
+
                     Alert doubleCheck = new Alert(Alert.AlertType.CONFIRMATION);
                     doubleCheck.setContentText(
                             "Delete sheet '" + sheet.getName() + "'. Are "
@@ -546,16 +549,16 @@ public class EditorDialogs {
                         File sheetFile = new File(sheet.getPath());
                         sheetFile.delete();
                         // TODO:  Move File to backup.
-                        
+
                         File sheetPropFile = new File(
-                                sheetFile.getParentFile(), 
+                                sheetFile.getParentFile(),
                                 sheetFile.getName().split(".png")[0] + ".properties"
                         );
                         sheetPropFile.delete();
-                        
+
                         // TODO: Move properties file to backup.
                         project.getSheets().remove(sheet);
-                        
+
                         return "DELETE";
                     } else {
                         log.log(Level.INFO, "User cancelled Delete Sheet dialog.");
@@ -571,10 +574,24 @@ public class EditorDialogs {
         if (result.isPresent()) {
             project.setEdited(true);
             project.notifyProjectChanged(
-                    project,EditorProjectListener.ChangeType.EDITED
+                    project, EditorProjectListener.ChangeType.EDITED
             );
         }
-        
+
+    }
+
+    static void confirmCloseEditedProjectDialog(EditorProject project, Stage stage) {
+        Alert alert = new Alert(AlertType.CONFIRMATION);
+        alert.setTitle("Close Project");
+        alert.setHeaderText("Are you sure want to close the project?");
+        alert.setContentText(project.getName() + " at:" + project.getFilePath() );
+
+        Optional<ButtonType> option = alert.showAndWait();
+
+        if (option.get() == ButtonType.OK) {
+            log.log(Level.INFO, "Project closed by user.");
+            project.clear();
+        }
     }
 
 }

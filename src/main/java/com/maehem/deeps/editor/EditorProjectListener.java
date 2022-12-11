@@ -22,7 +22,7 @@ package com.maehem.deeps.editor;
  * @author Mark J Koch ( GitHub @maehem)
  */
 public interface EditorProjectListener {
-    public static enum ChangeType{SAVED,LOADED,EDITED,ZONE_NAME,SHEET_NAME,TILE,FUNC, FOCUS}
+    public static enum ChangeType{SAVED,CLEARED, LOADED,EDITED,ZONE_NAME,SHEET_NAME,TILE,FUNC, FOCUS}
     
     public void projectStateChanged( EditorProject p, ChangeType type);
     

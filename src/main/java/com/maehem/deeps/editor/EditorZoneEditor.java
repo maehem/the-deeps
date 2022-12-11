@@ -314,6 +314,9 @@ public class EditorZoneEditor extends ScrollPane implements EditorProjectListene
         if (type == ChangeType.TILE) {
             updateCursor();
         }
+        if ( type == ChangeType.CLEARED ) {
+            project.removeListener(this);
+        }
     }
 
 }

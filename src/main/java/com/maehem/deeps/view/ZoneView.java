@@ -37,7 +37,7 @@ public class ZoneView extends Group implements ZoneListener {
 
     public ZoneView(Zone zm) {
         this.zone = zm;
-        log.log(Level.FINER, "Create ZoneView for : {0}", zm.getName());
+        log.log(Level.INFO, "Create ZoneView for : {0}", zm.getName());
 
         buildMap();
         buildFixtures();
@@ -49,7 +49,7 @@ public class ZoneView extends Group implements ZoneListener {
      * Build the map.
      */
     private void buildMap() {
-        log.log(Level.FINER, "  Build Map");
+        log.log(Level.INFO, "    Build Map");
         for (int y = 0; y < zone.getHeight(); y++) {
             for (int x = 0; x < zone.getWidth(); x++) {
                 Tile tm = zone.getMapTile(x, y);
@@ -67,7 +67,7 @@ public class ZoneView extends Group implements ZoneListener {
     }
     
     private void buildFixtures() {
-        log.log(Level.INFO, "  Build Fixtures" );
+        log.log(Level.INFO, "    Build Fixtures" );
         for (int y = 0; y < zone.getHeight(); y++) {
             for (int x = 0; x < zone.getWidth(); x++) {
                 Tile tm = zone.getFixtureTile(x, y);
@@ -84,7 +84,7 @@ public class ZoneView extends Group implements ZoneListener {
     }
 
     private void buildEntities() {
-        log.log(Level.INFO, "  Build Entities" );
+        log.log(Level.INFO, "    Build Entities" );
         for (int y = 0; y < zone.getHeight(); y++) {
             for (int x = 0; x < zone.getWidth(); x++) {
                 Tile tm = zone.getEntityTile(x, y);
