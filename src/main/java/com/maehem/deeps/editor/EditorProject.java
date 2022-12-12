@@ -39,6 +39,7 @@ import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.scene.Scene;
+import javafx.stage.Stage;
 
 /**
  *
@@ -50,14 +51,18 @@ public final class EditorProject implements GameModel {
 
     private final static String APP_DIR = ".deeps-game"; // Under users ~/Documents folder
     private static final String PREV_PROJECTS = "previous.projects";
+    private final static String PROJECTS_DIR = "DeepsProjects"; // Under users ~/Documents/DeepsProjects folder
+    public final static String PROJECTS_FILE = "project.properties"; // Under any projects dir,
 
     private String name = "Untitled";
     private File projectDir = null;
     private boolean edited = false;
+    private boolean loaded = false;
     private final ArrayList<Zone> zones = new ArrayList<>();
     private final ArrayList<SheetModel> sheets = new ArrayList<>();
     //private final HashMap<Character, SheetModel> sheetMap = new HashMap<>();
     //private String currentTile = "A00";
+    private Stage stage;
     private Scene scene;
 
     private final ArrayList<EditorProjectListener> listeners = new ArrayList<>();
@@ -88,15 +93,25 @@ public final class EditorProject implements GameModel {
                         appDataDir.getAbsolutePath());
             }
         }
+        File appProjectsDir = getProjectsDir();
+        log.log(Level.INFO,
+                "Editor Projects Directory is: {0}", appProjectsDir
+        );
+        if (!appProjectsDir.isDirectory()) {
+            if (appProjectsDir.mkdir()) {
+                log.log(Level.INFO, 
+                        "Created projects directory at: {0}", 
+                        appProjectsDir.getAbsolutePath());
+            } else {
+                log.log(Level.SEVERE,
+                        "Could not create app data directory: {0}",
+                        appProjectsDir.getAbsolutePath());
+            }
+        }
 
         ArrayList<String> projects = loadPreviousProjects();
         if ( !projects.isEmpty() ) {
-            try {
-                readFile( new File(projects.get(0) ) );
-                notifyProjectChanged(this, ChangeType.LOADED);
-            } catch (FileNotFoundException ex) {
-                Logger.getLogger(EditorProject.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            loadProject(new File(projects.get(0)));
         }
         
         notifyProjectChanged(this, ChangeType.LOADED);
@@ -110,22 +125,43 @@ public final class EditorProject implements GameModel {
         return INSTANCE;
     }
 
+    public boolean isLoaded() {
+        return loaded;
+    }
+    
     public boolean isEdited() {
         return edited;
     }
 
+    public void loadProject( File file ) {
+            try {
+                readFile( file );
+                loaded = true;
+                notifyProjectChanged(this, ChangeType.LOADED);
+            } catch (FileNotFoundException ex) {
+                Logger.getLogger(EditorProject.class.getName()).log(Level.SEVERE, null, ex);
+            }
+    }
+    
     public void clear() {
-        setName("New Project");
-        setFilePath(null);
-        setEdited(false);
-        setFocusedEntityTile(null);
-        setFocusedFixtureTile(null);
-        setFocusedMapTile(null);
-        setCurrentSheetTile(-1L, null);
-        setFunction(Function.SELECT);
-        sheets.clear();
-        zones.clear();
-        notifyProjectChanged(this, ChangeType.CLEARED);
+        // Prompt to save if project.edited
+        if (isEdited()) {
+            EditorDialogs.confirmCloseEditedProjectDialog(this, stage);
+            // dialog calls project.clear() if user confirms.
+        } else {
+            setName("New Project");
+            setFilePath(null);
+            setEdited(false);
+            setFocusedEntityTile(null);
+            setFocusedFixtureTile(null);
+            setFocusedMapTile(null);
+            setCurrentSheetTile(-1L, null);
+            setFunction(Function.SELECT);
+            sheets.clear();
+            zones.clear();
+            loaded = false;
+            notifyProjectChanged(this, ChangeType.CLEARED);
+        }
     }
     
     public boolean addListener(EditorProjectListener l) {
@@ -142,11 +178,18 @@ public final class EditorProject implements GameModel {
     }
 
     protected void notifyProjectChanged(EditorProject p, ChangeType type) {
+        if ( type == ChangeType.LOADED ) {
+            loaded = true;
+        }
         for (EditorProjectListener l : (ArrayList<EditorProjectListener>)listeners.clone()) {
             l.projectStateChanged(this,type);
         }
     }
 
+    public void setStage( Stage stage ) {
+        this.stage = stage;
+    }
+    
     public void setScene( Scene scene ) {
         this.scene = scene;
     }
@@ -367,6 +410,19 @@ public final class EditorProject implements GameModel {
         }
 
         return new File(documentsDir, APP_DIR);
+    }
+
+    public final File getProjectsDir() {
+        String homeDirPath = System.getProperty("user.home");
+        File homeDir = new File(homeDirPath);
+
+        File documentsDir = new File(homeDir, "Documents");
+        if (!documentsDir.isDirectory()) {
+            log.log(Level.SEVERE, 
+                    "Could not find User Documents directory!");
+        }
+
+        return new File(documentsDir, PROJECTS_DIR);
     }
 
     private ArrayList<String> loadPreviousProjects() {

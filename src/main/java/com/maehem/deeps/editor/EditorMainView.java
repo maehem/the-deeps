@@ -51,6 +51,7 @@ public class EditorMainView {
         
         stage.show();
         EditorProject project = EditorProject.getInstance();
+        project.setStage(stage);
         project.setScene(scene);
         project.notifyProjectChanged(project,
                 EditorProjectListener.ChangeType.LOADED

@@ -79,11 +79,9 @@ public class EditorProjectNavigator extends VBox implements EditorProjectListene
 
         // Zones Toolbar
         Button newZoneButton = createSizedButton("New Zone", -4);
-        newZoneButton.setOnAction((t) -> {
-            // Create a new Zone
+        newZoneButton.setOnAction((t) -> {  // Create a new Zone
             actionCreateNewZone();
             updateTree();
-            //collapseZones();
         });
 
         ArrayList<Node> zoneBtnList = new ArrayList<>();
@@ -91,8 +89,7 @@ public class EditorProjectNavigator extends VBox implements EditorProjectListene
 
         // Sheets Toolbar
         Button newZSheetButton = createSizedButton("New Sheet", -4);
-        newZSheetButton.setOnAction((t) -> {
-            // Create a new Zone
+        newZSheetButton.setOnAction((t) -> { // Create a new Sheet
             actionCreateNewSheet(stage);
             updateTree();
         });
@@ -183,8 +180,7 @@ public class EditorProjectNavigator extends VBox implements EditorProjectListene
         Pane spacer = new Pane();
         HBox.setHgrow(spacer, Priority.SOMETIMES);
         Button propsButton = createButton("Sheet Settings", "/icons/cogwheel.png");
-        propsButton.setOnAction((t) -> {
-            // Sheet settings dialog
+        propsButton.setOnAction((t) -> { // Sheet settings dialog
             EditorDialogs.sheetSettingsDialog(project, sm);
         });
         HBox itemArea = new HBox(nameLabel, spacer, propsButton);
@@ -255,16 +251,6 @@ public class EditorProjectNavigator extends VBox implements EditorProjectListene
         return titledPane;
     }
 
-//    private void collapseZones() {
-//        for (Node n : zonesListNode.getChildren()) {
-//            if (n instanceof TitledPane) {
-//                ((TitledPane) (n)).setExpanded(false);
-//            }
-//        }
-//        //accordion.setExpandedPane(null);
-//
-//    }
-//    
     private Button createButton(String name, String path) {
         Image img = new Image(getClass().getResourceAsStream(path));
         ImageView view = new ImageView(img);

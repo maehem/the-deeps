@@ -16,6 +16,8 @@
  */
 package com.maehem.deeps.editor;
 
+import java.io.File;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Separator;
 import javafx.scene.control.ToolBar;
@@ -25,6 +27,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
+import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 
 /**
@@ -39,13 +42,6 @@ public class EditorToolbar extends ToolBar implements EditorProjectListener {
     private final Button newFileButton; // = new Button("New");
     private final Button openButton; // = new Button("Open");
     private final Button saveButton;
-    
-    
-    //private final Button stampButton; // = new Button("Stamp");
-    
-    //private final Button zoomOut; //= new Button("-");
-    //private final Button zoomIn; //= new Button("+");
-    //private final Button zoomReset; // = new Button("1:1");
 
     private final Button midButton = new Button("XXX");
     private final Button infoButton = new Button("?");
@@ -57,11 +53,6 @@ public class EditorToolbar extends ToolBar implements EditorProjectListener {
         newFileButton = createButton("New File", "/icons/plus-circle.png");
         openButton = createButton("Open", "/icons/folder-open.png");
         saveButton = createButton("Save", "/icons/floppy-disk.png");
-        //stampButton = createButton("Stamp", "/icons/paw-print.png");
-        
-        //zoomOut   = createButton("Zoom Out", "/icons/zoom-out.png");
-        //zoomIn    = createButton("Zoom Out", "/icons/zoom-in.png");
-        //zoomReset = createButton("Zoom Reset", "/icons/magnifier.png");
         
         HBox.setHgrow(
                 leftSpacer,
@@ -78,11 +69,6 @@ public class EditorToolbar extends ToolBar implements EditorProjectListener {
                 openButton,
                 saveButton,
                 createSeparator(),
-                //stampButton,
-                //createSeparator(),
-                //zoomOut,
-                //zoomIn,
-                //zoomReset ,       
                 leftSpacer,
                 midButton,
                 rightSpacer,
@@ -94,17 +80,33 @@ public class EditorToolbar extends ToolBar implements EditorProjectListener {
         updateState();
         
         newFileButton.setOnAction((t) -> {
-            // Prompt to save if project.edited
-            if ( project.isEdited() ) {
-                EditorDialogs.confirmCloseEditedProjectDialog(project, stage);
-                // dialog calls project.clear() if user confirms.
-            } else {
-                project.clear();
-            }
-            updateState();
+            project.clear();
         });
         
         openButton.setOnAction((t) -> {
+            
+            // TODO:  Open list of previous open project paths and allow
+            //      selecting one or a new path as below:
+            
+            DirectoryChooser dc =  new DirectoryChooser();
+            dc.setTitle("Choose Existing Project Directory");
+            dc.setInitialDirectory(project.getProjectsDir());
+            File selectedDir = dc.showDialog(stage);
+            
+            if ( selectedDir != null ) {
+                File projectSettings = new File(selectedDir, EditorProject.PROJECTS_FILE );
+                if ( projectSettings.exists() ) {
+                    // load the project
+                    project.clear();
+                    project.loadProject(selectedDir);
+                } else {
+                    // Alert that folder is not a valid project.
+                    Alert alert = new Alert(Alert.AlertType.WARNING);
+                    alert.setContentText("Selected Folder is not a project directory!");
+                    alert.setTitle("Not a Project Folder");
+                    alert.show();
+                }
+            } // else nothing happens.
         });
         
         saveButton.setOnAction((t) -> {

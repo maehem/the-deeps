@@ -76,7 +76,7 @@ public class EditorDialogs {
             DirectoryChooser dirChooser = new DirectoryChooser();
             File f = dirChooser.showDialog(stage);
             if (f != null) {
-                File projectFile = new File(f, "project.properties");
+                File projectFile = new File(f, EditorProject.PROJECTS_FILE);
                 if (projectFile.exists()) {
                     Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
                     alert.setContentText(
@@ -261,12 +261,6 @@ public class EditorDialogs {
 
         Optional<String> result = dialog.showAndWait();
 
-//        if (result.isPresent()) {
-//            //project.getZones().add(result.get());
-//            
-//            project.setEdited(true);
-//            project.notifyProjectChanged();
-//        }
     }
 
     private static Button createIconButton(String name, String path) {
@@ -285,45 +279,7 @@ public class EditorDialogs {
 
         return b;
     }
-
-//    protected static void oldSheetDialog(EditorProject project, Stage stage) {
-//        // Dialog select sheet file  PNG
-//        FileChooser sheetChooser = new FileChooser();
-//        sheetChooser.getExtensionFilters().addAll(
-//                new FileChooser.ExtensionFilter("PNG Files", "*.png")
-//        );
-//        File newSheetFile = sheetChooser.showOpenDialog(stage);
-//        if ( newSheetFile != null ) {
-//            // Copy it to projectDir/sheets/...
-//            File dest = new File(project.getSheetsDir(), newSheetFile.getName());
-//            try {
-//                Path copy = Files.copy(
-//                        newSheetFile.toPath(),
-//                        dest.toPath(),
-//                        java.nio.file.StandardCopyOption.REPLACE_EXISTING,
-//                        java.nio.file.StandardCopyOption.COPY_ATTRIBUTES,
-//                        NOFOLLOW_LINKS
-//                );
-//                if ( copy != null ) {
-//                    log.log(Level.WARNING, "Copied sheet to: {0}", copy.toString());
-//                    
-//                    //  Create the properties file.
-//                    
-//                    
-//                    SheetModel sheet = new SheetModel(dest);
-//                    project.getSheets().add(sheet);
-//                    project.registerSheet(sheet);
-//                    project.notifyProjectChanged();
-//                }
-//                
-//            } catch (IOException ex) {
-//                Logger.getLogger(EditorDialogs.class.getName()).log(Level.SEVERE, null, ex);
-//            }
-//        }
-//        
-//        
-//
-//    }
+    
     protected static void newSheetDialog(EditorProject project, Stage stage) {
         // Present a dialog.
         Dialog<SheetModel> dialog = new Dialog<>();
@@ -332,43 +288,18 @@ public class EditorDialogs {
                 + "Enter info and press Okay (or click title bar 'X' for cancel).");
         dialog.setResizable(true);
 
-//        Label nameLabel = new Label("Name: ");
-//        Label uidLabel = new Label("UID: ");
         Label pathLabel = new Label("Path: ");
-        //Label widthLabel = new Label("Width: ");
-        //Label heightLabel = new Label("Height: ");
-//        Label sizeLabel = new Label("Tile Size: ");
-//        Label authorLabel = new Label("Author: ");
 
-        // TODO: Add code to only allow numeric entry.
-//        TextField nameText = new TextField("Sheet" + (int) (Math.random() * 10000));
-//        TextField uidText = new TextField(String.valueOf((Math.random() * Long.MAX_VALUE)));
-        //TextField pathText = new TextField(project.getFilePath());
         TextField pathText = new TextField("");
         Button pathButton = createIconButton("Select Project Folder", "/icons/folder.png");
         pathButton.setPadding(new Insets(5));
         HBox pathBox = new HBox(pathText, pathButton);
-        //TextField widthText = new TextField(String.valueOf(12));
-        //TextField heightText = new TextField(String.valueOf(12));
-//        TextField sizeText = new TextField("16");
-//        TextField authorText = new TextField("Unknown");
 
         GridPane grid = new GridPane();
-
-//        grid.add(nameLabel, 1, 1);
-//        grid.add(nameText, 2, 1);
-//
-//        grid.add(uidLabel, 1, 2);
-//        grid.add(uidText, 2, 2);
 
         grid.add(pathLabel, 1, 1);
         grid.add(pathBox, 2, 1);
 
-//        grid.add(sizeLabel, 1, 4);
-//        grid.add(sizeText, 2, 4);
-//
-//        grid.add(authorLabel, 1, 5);
-//        grid.add(authorText, 2, 5);
 
         dialog.getDialogPane().setContent(grid);
 
@@ -388,7 +319,7 @@ public class EditorDialogs {
                     pathText.setText(newSheetFile.getAbsolutePath());
                 } else {
                     Alert alert = new Alert(AlertType.WARNING);
-                    alert.setHeaderText("PNG file needs a properties file!");
+                    alert.setHeaderText("PNG file needs a coresponding properties file!");
                     alert.setContentText("Use the Sheets Editor to create usable sheets.");
                     alert.show();                    
                 }
@@ -446,27 +377,6 @@ public class EditorDialogs {
                                 //  return new SheetModel( dest );
                             }
                             
-                            
-//                            Properties sheetProps = new Properties();
-//                            sheetProps.put("name", nameText.getText());
-//                            sheetProps.put("size", sizeText.getText());
-//                            sheetProps.put("author", authorText.getText());
-//
-//                            sheetProps.store(new FileOutputStream(propFile), "Created Props");
-//                            log.log(Level.WARNING, "Created properties file for: {0}", propFile.getName());
-
-                            //  Create the properties file.
-                            //SheetModel sheet = new SheetModel(dest);
-                            //project.getSheets().add(sheet);
-                            //project.registerSheet(sheet);
-                            //project.notifyProjectChanged();
-                            //return new SheetModel(dest);
-//                            return SheetModel.createSheet(dest,
-//                                    nameText.getText(),
-//                                    Long.valueOf(uidText.getText()),
-//                                    sizeText.getText(),
-//                                    authorText.getText()
-//                            );
                             return null;
                         }
 
