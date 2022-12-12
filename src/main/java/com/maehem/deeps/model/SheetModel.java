@@ -26,6 +26,8 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Properties;
 import java.util.logging.Level;
+
+// TODO: get rid of JavaFX dependency
 import javafx.scene.image.Image;
 
 /**
