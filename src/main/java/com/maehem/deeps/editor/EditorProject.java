@@ -60,39 +60,20 @@ public final class EditorProject implements GameModel {
     private boolean loaded = false;
     private final ArrayList<Zone> zones = new ArrayList<>();
     private final ArrayList<SheetModel> sheets = new ArrayList<>();
-    //private final HashMap<Character, SheetModel> sheetMap = new HashMap<>();
-    //private String currentTile = "A00";
+
     private Stage stage;
     private Scene scene;
 
     private final ArrayList<EditorProjectListener> listeners = new ArrayList<>();
     private EditorZoneEditor.Function function;
     private long currentTileUID = -1L;
-    //private int currentTileNum = 0;
+
     private Tile currentSheetTile = null; // Tile that is highlighted in visible SheetViewTabPane
     private Tile focusedBaseTile = null; // Tile that is highlighted in visible Zone editor tab
     private Tile focusedItemTile = null; // Tile that is highlighted in visible Zone editor tab
     private Tile focusedEntityTile = null; // Tile that is highlighted in visible Zone editor tab
 
     private EditorProject() {
-//        File appDataDir = getAppDataDir();
-//        log.log(Level.INFO,
-//                "Editor Settings Directory is: {0}", appDataDir
-//        );
-//        if (!appDataDir.isDirectory()) {
-//            if (appDataDir.mkdir()) {
-//                File prevProjectsFile = new File(appDataDir, PREV_PROJECTS);
-//                try (FileWriter fw = new FileWriter(prevProjectsFile)) {
-//                    fw.write("");
-//                } catch (IOException ex) {
-//                    Logger.getLogger(EditorProject.class.getName()).log(Level.SEVERE, null, ex);
-//                }
-//            } else {
-//                log.log(Level.SEVERE,
-//                        "Could not create app data directory: {0}",
-//                        appDataDir.getAbsolutePath());
-//            }
-//        }
         File appProjectsDir = getProjectsDir();
         if (appProjectsDir.exists()) {
             log.log(Level.INFO,
@@ -398,19 +379,6 @@ public final class EditorProject implements GameModel {
         return zonesDir.listFiles((File dir, String nam) -> nam.endsWith(".zone"));
     }
 
-//    public final File getAppDataDir() {
-//        String homeDirPath = System.getProperty("user.home");
-//        File homeDir = new File(homeDirPath);
-//
-//        File documentsDir = new File(homeDir, "Documents");
-//        if (!documentsDir.isDirectory()) {
-//            log.log(Level.SEVERE, 
-//                    "Could not find User Documents directory!");
-//        }
-//
-//        return new File(documentsDir, APP_DIR);
-//    }
-
     public final File getProjectsDir() {
         String homeDirPath = System.getProperty("user.home");
         File homeDir = new File(homeDirPath);
@@ -434,11 +402,11 @@ public final class EditorProject implements GameModel {
         
         BufferedReader reader;
         try {
-            log.log(Level.INFO, "Read " + PREV_PROJECTS + " file...");
+            log.log(Level.CONFIG, "Read " + PREV_PROJECTS + " file...");
             reader = new BufferedReader(new FileReader(getPreviousProjectsListFile()));
             String line = reader.readLine();
             while (line != null) {
-                log.log(Level.INFO, "    {0}", line);
+                log.log(Level.FINE, "    {0}", line);
                 lines.add(line);
                 // read next line
                 line = reader.readLine();
@@ -449,7 +417,7 @@ public final class EditorProject implements GameModel {
         }
         
         if (lines.isEmpty()) {
-            log.log(Level.INFO, "    no previous projects found.");
+            log.log(Level.INFO, "    no previous projects file found.");
         }
 
         return lines;
@@ -468,10 +436,10 @@ public final class EditorProject implements GameModel {
         ArrayList<String> list = getPreviousProjectList();
         list.remove(path);
         list.add(0, path);
-        log.log(Level.INFO, "Write list of paths to file:");
+        log.log(Level.CONFIG, "Write list of paths to file:");
         try (FileWriter fw = new FileWriter(pFile)) {
             for (String line : list) {
-                log.log(Level.INFO, "    {0}", line);
+                log.log(Level.FINE, "    {0}", line);
                 fw.append(line).append("\n");
             }
         } catch (IOException ex) {
@@ -522,21 +490,6 @@ public final class EditorProject implements GameModel {
         notifyProjectChanged(this,ChangeType.TILE);
     }
     
-//    /**
-//     * 
-//     * @param tileType
-//     * @return selected tile or null if none.
-//     */
-//    Tile getFocusedTile(Zone.TileType tileType) {
-//        switch( tileType ) {
-//            case BASE:
-//                return focusedBaseTile;
-//            case ITEM:
-//                return focusedItemTile;
-//        }
-//        return null;
-//    }
-    
     public Tile getFocusedMapTile() {
         return focusedBaseTile;
     }
@@ -549,25 +502,6 @@ public final class EditorProject implements GameModel {
         return focusedEntityTile;
     }
 
-//    /**
-//     * @param tileType
-//     * @param focusedTile the focusedTile to set
-//     */
-//    public void setFocusedTile(Zone.TileType tileType, Tile focusedTile) {
-//        switch ( tileType ) {
-//            case BASE:
-//                if ( focusedBaseTile != focusedTile ) {
-//                    focusedBaseTile = focusedTile;
-//                    notifyProjectChanged(this, ChangeType.FOCUS);
-//                }
-//            case ITEM:
-//                if ( focusedItemTile != focusedTile ) {
-//                    focusedItemTile = focusedTile;
-//                    notifyProjectChanged(this, ChangeType.FOCUS);
-//                }
-//        }
-//    }
-    
     public void setFocusedMapTile( Tile  t ) {
         if ( focusedBaseTile != t ) {
             focusedBaseTile = t;
