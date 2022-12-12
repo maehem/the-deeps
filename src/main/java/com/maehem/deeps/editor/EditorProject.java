@@ -75,41 +75,68 @@ public final class EditorProject implements GameModel {
     private Tile focusedEntityTile = null; // Tile that is highlighted in visible Zone editor tab
 
     private EditorProject() {
-        File appDataDir = getAppDataDir();
-        log.log(Level.INFO,
-                "Editor Settings Directory is: {0}", appDataDir
-        );
-        if (!appDataDir.isDirectory()) {
-            if (appDataDir.mkdir()) {
-                File prevProjectsFile = new File(appDataDir, PREV_PROJECTS);
-                try (FileWriter fw = new FileWriter(prevProjectsFile)) {
-                    fw.write("");
-                } catch (IOException ex) {
-                    Logger.getLogger(EditorProject.class.getName()).log(Level.SEVERE, null, ex);
-                }
+//        File appDataDir = getAppDataDir();
+//        log.log(Level.INFO,
+//                "Editor Settings Directory is: {0}", appDataDir
+//        );
+//        if (!appDataDir.isDirectory()) {
+//            if (appDataDir.mkdir()) {
+//                File prevProjectsFile = new File(appDataDir, PREV_PROJECTS);
+//                try (FileWriter fw = new FileWriter(prevProjectsFile)) {
+//                    fw.write("");
+//                } catch (IOException ex) {
+//                    Logger.getLogger(EditorProject.class.getName()).log(Level.SEVERE, null, ex);
+//                }
+//            } else {
+//                log.log(Level.SEVERE,
+//                        "Could not create app data directory: {0}",
+//                        appDataDir.getAbsolutePath());
+//            }
+//        }
+        File appProjectsDir = getProjectsDir();
+        if (appProjectsDir.exists()) {
+            log.log(Level.INFO,
+                "Editor Projects Directory is: {0}", appProjectsDir
+            );
+        } else {
+            if (appProjectsDir.mkdir()) {
+                log.log(Level.INFO,
+                    "Created Editor Projects Directory: {0}", appProjectsDir
+                );
             } else {
                 log.log(Level.SEVERE,
-                        "Could not create app data directory: {0}",
-                        appDataDir.getAbsolutePath());
+                    "Could not create projects directory: {0}",
+                    appProjectsDir.getAbsolutePath()
+                );
+                return;
             }
         }
-        File appProjectsDir = getProjectsDir();
-        log.log(Level.INFO,
-                "Editor Projects Directory is: {0}", appProjectsDir
-        );
-        if (!appProjectsDir.isDirectory()) {
-            if (appProjectsDir.mkdir()) {
-                log.log(Level.INFO, 
-                        "Created projects directory at: {0}", 
-                        appProjectsDir.getAbsolutePath());
-            } else {
-                log.log(Level.SEVERE,
-                        "Could not create app data directory: {0}",
-                        appProjectsDir.getAbsolutePath());
+        
+        File prevProjectsFile = new File(appProjectsDir, PREV_PROJECTS);
+        if (!prevProjectsFile.exists()) {
+            try {
+                if (prevProjectsFile.createNewFile()) {
+                    log.log(Level.INFO,
+                            "Created previous projects file at: {0}",
+                            appProjectsDir.getAbsolutePath()
+                    );
+                } else {
+                    log.log(Level.SEVERE,
+                            "Could not create a new previous projects file at: {0}",
+                            prevProjectsFile.getAbsolutePath()
+                    );
+                }
+            } catch (IOException ex) {
+                Logger.getLogger(EditorProject.class.getName()).log(Level.SEVERE, null, ex);
             }
+        } else {
+            log.log(Level.INFO,
+                    "Found previous projects file at: {0}",
+                    appProjectsDir.getAbsolutePath()
+            );            
         }
 
-        ArrayList<String> projects = loadPreviousProjects();
+        ArrayList<String> projects = getPreviousProjectList();
         if ( !projects.isEmpty() ) {
             loadProject(new File(projects.get(0)));
         }
@@ -137,6 +164,7 @@ public final class EditorProject implements GameModel {
             try {
                 readFile( file );
                 loaded = true;
+                rememberPreviousProject(file);
                 notifyProjectChanged(this, ChangeType.LOADED);
             } catch (FileNotFoundException ex) {
                 Logger.getLogger(EditorProject.class.getName()).log(Level.SEVERE, null, ex);
@@ -369,48 +397,19 @@ public final class EditorProject implements GameModel {
         File zonesDir = new File(projectDir, "zones");
         return zonesDir.listFiles((File dir, String nam) -> nam.endsWith(".zone"));
     }
-    
-//    public Character registerSheet(SheetModel sheet) {
-//        if (sheetMap.size() >= 26) {
-//            return null; // Sheet map size reached.
-//        }
-//        
-//        Character c = sheet.getIndex();
-//        if ( c == null ) {
-//            c = getNewSheetIndex();
-//            sheet.setIndex(c);
+
+//    public final File getAppDataDir() {
+//        String homeDirPath = System.getProperty("user.home");
+//        File homeDir = new File(homeDirPath);
+//
+//        File documentsDir = new File(homeDir, "Documents");
+//        if (!documentsDir.isDirectory()) {
+//            log.log(Level.SEVERE, 
+//                    "Could not find User Documents directory!");
 //        }
 //
-//        log.log(Level.INFO, 
-//                "Register Sheet: {0}  sheet: {1}", 
-//                new Object[]{c, sheet.getName()}
-//        );
-//        sheetMap.put(c, sheet);
-//        return c;
+//        return new File(documentsDir, APP_DIR);
 //    }
-    
-//    public Character getNewSheetIndex() {
-//        char c;
-//        do {
-//            int random = (int) (Math.random() * 26);
-//            c = (char) (random + 'A');
-//        } while (sheetMap.containsKey(c));
-//        
-//        return c;
-//    }
-
-    public final File getAppDataDir() {
-        String homeDirPath = System.getProperty("user.home");
-        File homeDir = new File(homeDirPath);
-
-        File documentsDir = new File(homeDir, "Documents");
-        if (!documentsDir.isDirectory()) {
-            log.log(Level.SEVERE, 
-                    "Could not find User Documents directory!");
-        }
-
-        return new File(documentsDir, APP_DIR);
-    }
 
     public final File getProjectsDir() {
         String homeDirPath = System.getProperty("user.home");
@@ -425,16 +424,18 @@ public final class EditorProject implements GameModel {
         return new File(documentsDir, PROJECTS_DIR);
     }
 
-    private ArrayList<String> loadPreviousProjects() {
-        File appDataDir = getAppDataDir();
+    private File getPreviousProjectsListFile() {
+        File projDir = getProjectsDir();
+        return new File(projDir, PREV_PROJECTS);
+    }
+    
+    private ArrayList<String> getPreviousProjectList() {
         ArrayList<String> lines = new ArrayList<>();
         
-        File recentProjects = new File(appDataDir, PREV_PROJECTS);
-
-        log.log(Level.INFO, "Read" + PREV_PROJECTS + " file...");
         BufferedReader reader;
         try {
-            reader = new BufferedReader(new FileReader(recentProjects));
+            log.log(Level.INFO, "Read " + PREV_PROJECTS + " file...");
+            reader = new BufferedReader(new FileReader(getPreviousProjectsListFile()));
             String line = reader.readLine();
             while (line != null) {
                 log.log(Level.INFO, "    {0}", line);
@@ -453,11 +454,30 @@ public final class EditorProject implements GameModel {
 
         return lines;
     }
-
-//    @Override
-//    public SheetModel getSheet(Character key) {
-//        return sheetMap.get(key);
-//    }
+    
+    /**
+     * Put project dir into list at element 0 
+     * or move it up to 0 if it's already in the list.
+     * 
+     * @param proj project directory @File
+     */
+    private void rememberPreviousProject( File proj ) {
+        String path = proj.getAbsolutePath();
+        log.log(Level.INFO, "Remember project: {0}", path);
+        File pFile = getPreviousProjectsListFile();
+        ArrayList<String> list = getPreviousProjectList();
+        list.remove(path);
+        list.add(0, path);
+        log.log(Level.INFO, "Write list of paths to file:");
+        try (FileWriter fw = new FileWriter(pFile)) {
+            for (String line : list) {
+                log.log(Level.INFO, "    {0}", line);
+                fw.append(line).append("\n");
+            }
+        } catch (IOException ex) {
+            log.log(Level.SEVERE, null, ex);
+        }
+    }
 
     protected void setFunction(Function function) {
         if ( this.function != function ) {
