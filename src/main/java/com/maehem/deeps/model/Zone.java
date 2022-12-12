@@ -328,7 +328,7 @@ public class Zone {
             throw new ZoneFileFormatException("Zone file does not seem to have 'name:' defined!");
         }
         String name = line.split(": ")[1];
-        log.log(Level.INFO, "Reading Zone file for: {0}", name);
+        log.log(Level.FINE, "Reading Zone file for: {0}", name);
 
         while ( line != null && !line.startsWith("IDX")) {
             line = br.readLine();

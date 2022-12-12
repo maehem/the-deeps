@@ -81,7 +81,7 @@ public abstract class Tile implements Cloneable {
         this.index = index;
         this.x = x;
         this.y = y;
-        log.log(Level.INFO, "Create new Tile({0},{1},{2},{3},{4})", 
+        log.log(Level.CONFIG, "Create new Tile({0},{1},{2},{3},{4})", 
                 new Object[]{zone==null?"null":zone.getName(), sheet, index, x, y}
         );
         

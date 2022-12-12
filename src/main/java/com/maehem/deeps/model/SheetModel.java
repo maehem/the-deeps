@@ -84,7 +84,7 @@ public class SheetModel {
      */
     public SheetModel(File pngFile) throws IOException {
         this.path = pngFile.getCanonicalPath();
-        log.log(Level.INFO, "SheetModel.Constructor PNG file path is: {0}", pngFile);
+        log.log(Level.FINE, "SheetModel(): PNG file path is: {0}", pngFile);
         InputStream props = new FileInputStream(
                 new File(getPropertiesFileName())
         );
@@ -111,7 +111,7 @@ public class SheetModel {
                 int tilenum = (getWidth()*y)+x;
                 //Tile t = new Tile("_" + tilenum, x, y, getPropsFor(tilenum));
                 String props = getPropsFor(tilenum);
-                log.log(Level.INFO, "    Props for tilenum: {0} ==>{1}", new Object[]{tilenum, props});
+                log.log(Level.CONFIG, "    Props for tilenum: {0} ==>{1}", new Object[]{tilenum, props});
                 tiles.add(createTile(tilenum, x, y, props));
                 //TileView tv = new TileView(t, sheet ); //, x, y);
                 //tileGroup.getChildren().add(tv);
