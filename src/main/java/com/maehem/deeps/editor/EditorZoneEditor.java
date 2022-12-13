@@ -157,14 +157,13 @@ public class EditorZoneEditor extends ScrollPane implements EditorProjectListene
 
     private void doStampBase(MouseEvent mevt, Class clazz) {
         log.log(Level.INFO, "Mouse click: {0}", mevt.getButton().name());
-        double tileSize = 16;
-        if (getCursor() instanceof ImageCursor) {
-            ImageCursor c = (ImageCursor) getCursor();
-            tileSize = c.getImage().getWidth();
-            log.log(Level.FINER, "Tile Size: {0}", tileSize);
-        }
-        int x = (int) (mevt.getX() / tileSize);
-        int y = (int) (mevt.getY() / tileSize);
+
+        Character sheetIndex = zone.getMapTile(0, 0).getSheet();
+        SheetModel sm = zone.getSheet(sheetIndex);
+        double tileSize = sm.getSize();
+        
+        int x = (int) (mevt.getX() / tileSize / getZoom());
+        int y = (int) (mevt.getY() / tileSize / getZoom());
         log.log(Level.INFO,
                 "Stamp at: {0}x{1}",
                 new Object[]{x, y});
