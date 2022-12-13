@@ -255,7 +255,6 @@ public final class EditorProject implements GameModel {
             log.severe("Save called on NULL project path!");
             return;
         }
-
         // save data
         writeFile();
         setEdited(false);
@@ -297,7 +296,6 @@ public final class EditorProject implements GameModel {
                             zf.getName());
                 }
             }
-            // TODO:  Keep only 10 freshest backup files for each name.
             
             for ( Zone z : getZones() ) {
                 File zoneFile = new File(zonesDir, z.getName() + ".zone");
@@ -306,6 +304,8 @@ public final class EditorProject implements GameModel {
                     z.store(zos);
                 }
             }
+            
+            rememberPreviousProject(projectDir);
             
         } catch (FileNotFoundException ex) {
             log.log(Level.SEVERE, null, ex);
