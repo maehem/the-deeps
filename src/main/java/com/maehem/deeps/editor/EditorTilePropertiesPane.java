@@ -25,7 +25,6 @@ import com.maehem.deeps.model.Tile;
 import com.maehem.deeps.model.TileProperty;
 import com.maehem.deeps.model.Zone;
 import com.maehem.deeps.view.TileView;
-import java.lang.reflect.Field;
 import java.text.DecimalFormat;
 import java.util.List;
 import java.util.logging.Level;
@@ -246,53 +245,57 @@ public class EditorTilePropertiesPane extends VBox implements EditorProjectListe
         return box;
     }
 
-    private Node createIntWidget(Class clazz, String fieldName) {
-        Label lbl = new Label(fieldName + ": ");
-        lbl.setPrefWidth(130);
-        lbl.setAlignment(Pos.BOTTOM_RIGHT);
-        lbl.setPadding(new Insets(4, 0, 0, 0));
-        Field field;
-        TextField tf = new TextField("ERROR");
-        tf.setMinWidth(100);
-        try {
-            field = clazz.getDeclaredField(fieldName);
-            field.setAccessible(true);
-            tf.setText(Integer.toString(field.getInt(currentTile)));
-            tf.setOnKeyTyped((t) -> {
-                log.log(Level.FINER, "Typing in textfield {0} => {1}",
-                        new Object[]{fieldName, t.getCharacter()});
-                try {
-                    int parseInt = Integer.parseInt(tf.getText());
-                    field.set(currentTile, parseInt);
-                    currentTile.notifyPropertyChanged(fieldName);
-                    project.setEdited(true);
-                } catch (NumberFormatException ex) {
-                    // Do not update value if not a number.
-                } catch (IllegalArgumentException ex) {
-                    log.log(Level.SEVERE, "Illegal Argument Exception", ex);
-                } catch (IllegalAccessException ex) {
-                    log.log(Level.SEVERE, "Illegal Access Exception", ex);
-                }
-            });
-        } catch (NoSuchFieldException ex) {
-            log.log(Level.SEVERE, "No such field " + fieldName, ex);
-        } catch (SecurityException ex) {
-            log.log(Level.SEVERE, "SecurityException for field: " + fieldName, ex);
-        } catch (IllegalArgumentException ex) {
-            log.log(Level.SEVERE, "IllegalArgument for field: " + fieldName, ex);
-        } catch (IllegalAccessException ex) {
-            log.log(Level.SEVERE, "IllegalAccess for field: " + fieldName, ex);
-        }
-
-        HBox box = new HBox(lbl, tf);
-        box.setPadding(new Insets(2, 10, 2, 0));
-        return box;
-    }
+//    private Node createIntWidget(Class clazz, String fieldName) {
+//        Label lbl = new Label(fieldName + ": ");
+//        lbl.setPrefWidth(130);
+//        lbl.setAlignment(Pos.BOTTOM_RIGHT);
+//        lbl.setPadding(new Insets(4, 0, 0, 0));
+//        Field field;
+//        TextField tf = new TextField("ERROR");
+//        tf.setMinWidth(100);
+//        try {
+//            field = clazz.getDeclaredField(fieldName);
+//            field.setAccessible(true);
+//            tf.setText(Integer.toString(field.getInt(currentTile)));
+//            tf.setOnKeyTyped((t) -> {
+//                log.log(Level.FINER, "Typing in textfield {0} => {1}",
+//                        new Object[]{fieldName, t.getCharacter()});
+//                try {
+//                    int parseInt = Integer.parseInt(tf.getText());
+//                    field.set(currentTile, parseInt);
+//                    currentTile.notifyPropertyChanged(fieldName);
+//                    project.setEdited(true);
+//                } catch (NumberFormatException ex) {
+//                    // Do not update value if not a number.
+//                } catch (IllegalArgumentException ex) {
+//                    log.log(Level.SEVERE, "Illegal Argument Exception", ex);
+//                } catch (IllegalAccessException ex) {
+//                    log.log(Level.SEVERE, "Illegal Access Exception", ex);
+//                }
+//            });
+//        } catch (NoSuchFieldException ex) {
+//            log.log(Level.SEVERE, "No such field " + fieldName, ex);
+//        } catch (SecurityException ex) {
+//            log.log(Level.SEVERE, "SecurityException for field: " + fieldName, ex);
+//        } catch (IllegalArgumentException ex) {
+//            log.log(Level.SEVERE, "IllegalArgument for field: " + fieldName, ex);
+//        } catch (IllegalAccessException ex) {
+//            log.log(Level.SEVERE, "IllegalAccess for field: " + fieldName, ex);
+//        }
+//
+//        HBox box = new HBox(lbl, tf);
+//        box.setPadding(new Insets(2, 10, 2, 0));
+//        return box;
+//    }
 
     @Override
     public void projectStateChanged(EditorProject p, ChangeType type) {
         if (type == ChangeType.FOCUS) {
 
+            log.log(Level.FINEST, 
+                    "EditorTilePropetiesPane.projectStateChanged.  type:{0}", 
+                    type.name());
+            
             Tile ct = null;
             if (tileClass == MapTile.class) {
                 ct = p.getFocusedMapTile();
