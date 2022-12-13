@@ -21,7 +21,6 @@ package com.maehem.deeps.model;
  * @author Mark J Koch ( GitHub @maehem)
  */
 public interface GameModel {
-    //public SheetModel getSheet( Character key );
     public SheetModel getSheet(Long uid);
     public SheetModel getDefaultSheet();
     public void addSheet( SheetModel sheet );
