@@ -156,7 +156,7 @@ public class EditorZoneEditor extends ScrollPane implements EditorProjectListene
     }
 
     private void doStampBase(MouseEvent mevt, Class clazz) {
-        log.log(Level.INFO, "Mouse click: {0}", mevt.getButton().name());
+        log.log(Level.CONFIG, "Mouse click: {0}", mevt.getButton().name());
 
         Character sheetIndex = zone.getMapTile(0, 0).getSheet();
         SheetModel sm = zone.getSheet(sheetIndex);
@@ -177,6 +177,7 @@ public class EditorZoneEditor extends ScrollPane implements EditorProjectListene
                 Tile clone = (Tile) project.getCurrentSheetTile().clone();
                 if (clone.getClass() == clazz) {
                     clone.setSheet(key);
+                    clone.setZone(zone);
                     zone.swapTile(x, y, clone);
                     project.setEdited(true);
                 } else {
