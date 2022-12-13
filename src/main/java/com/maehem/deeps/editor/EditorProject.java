@@ -49,7 +49,6 @@ public final class EditorProject implements GameModel {
 
     private static EditorProject INSTANCE;
 
-    private final static String APP_DIR = ".deeps-game"; // Under users ~/Documents folder
     private static final String PREV_PROJECTS = "previous.projects";
     private final static String PROJECTS_DIR = "DeepsProjects"; // Under users ~/Documents/DeepsProjects folder
     public final static String PROJECTS_FILE = "project.properties"; // Under any projects dir,
