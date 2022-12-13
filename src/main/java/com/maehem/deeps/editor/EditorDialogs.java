@@ -395,7 +395,7 @@ public class EditorDialogs {
             project.getSheets().add(result.get());
             project.setEdited(true);
             project.notifyProjectChanged(
-                    project, EditorProjectListener.ChangeType.EDITED
+                    project, EditorProjectListener.ChangeType.SHEET_NAME
             );
         }
     }
